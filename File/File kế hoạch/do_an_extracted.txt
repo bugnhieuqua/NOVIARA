@@ -1,0 +1,130 @@
+=== PARAGRAPHS ===
+[1] BÁO CÁO KẾ HOẠCH TRIỂN KHAI
+[2] ĐỀ TÀI THỰC TẬP CƠ SỞ (Học kỳ: 1,  Năm học: 2026-2027)
+[4] I. THÔNG TIN CHUNG
+[5] Danh sách thành viên:
+[6] II. TỔNG QUAN & MỤC TIÊU ĐỀ TÀI
+[7] 1. Bối cảnh/ Lý do chọn đề tài 
+[8] 	Trong các hoạt động học tập theo nhóm, việc phân chia sinh viên thường được thực hiện thủ công dựa trên sự quen biết, cảm tính hoặc lựa chọn nhanh. Cách làm này có thể dẫn đến chênh lệch năng lực giữa các nhóm, thiếu kỹ năng cần thiết hoặc tập trung quá nhiều sinh viên có năng lực tương đồng vào một nhóm. NOVIARA được đề xuất nhằm hỗ trợ giảng viên tạo phương án phân nhóm dựa trên dữ liệu sinh viên, kỹ năng và các ràng buộc được định nghĩa trước.
+[9] 	Hệ thống sử dụng Genetic Algorithm (GA) để tìm kiếm phương án phân nhóm có chất lượng cao theo hàm Fitness đa mục tiêu. Kết quả là phương án đề xuất để giảng viên xem xét, điều chỉnh và công bố, không phải quyết định thay thế con người.
+[10] 2. Mục tiêu cụ thể (Phải đạt được sau khi hoàn thành)
+[12] III. PHÂN CÔNG NHIỆM VỤ CHI TIẾT TRONG NHÓM 
+[14] IV. CÔNG NGHỆ & CÔNG CỤ SỬ DỤNG (Tech-Stack)
+[16] V. KẾ HOẠCH TRIỂN KHAI CHI TIẾT (THEO MỐC THỜI GIAN)
+[17] Các mốc kiểm soát (Milestone):
+[18] VI. DỰ KIẾN SẢN PHẨM BÀN GIAO CUỐI KỲ
+[19] Mã nguồn đầy đủ, cấu trúc rõ ràng, quản lý bằng Git/GitHub.
+[20] Web app React responsive gồm trang công khai, Admin Panel và User Portal.
+[21] Genetic Algorithm gồm chromosome, population, Fitness, selection, crossover, mutation, repair và termination.
+[22] Dữ liệu mẫu Excel/CSV cho các kịch bản 20, 40 và 60 sinh viên.
+[23] Cơ sở dữ liệu SQLite và cấu trúc lưu trữ phù hợp cho dữ liệu, kết quả và lịch sử.
+[24] Module benchmark Random, Greedy và GA; nhiều seed và runtime thực tế.
+[25] Rule-based Explanation dựa trên các thành phần Fitness; không gọi là XAI nếu không dùng phương pháp XAI chuyên biệt.
+[26] Download Excel/CSV và kiến trúc Export Google Sheets khi có xác thực/API phù hợp.
+[27] README/Installation Guide; báo cáo Word/PDF; slide bảo vệ; video demo 3–5 phút.
+[28] Phân quyền chức năng:
+[29] VII. RỦI RO VÀ PHƯƠNG ÁN DỰ PHÒNG
+[30] VIII. CAM KẾT CỦA NHÓM
+[31] Chúng tôi – nhóm sinh viên trên – xin cam đoan những thông tin trong bản kế hoạch này là chính xác và trung thực. Chúng tôi cam kết thực hiện đúng tiến độ, chủ động làm việc nhóm, không vi phạm đạo văn (plagiarism) và báo cáo tiến độ cho giảng viên hướng dẫn đúng hẹn.
+
+=== TABLES ===
+
+--- Table 0 ---
+TRƯỜNG ĐẠI HỌC NGHỆ AN KHOA CÔNG NGHỆ THÔNG TIN | CỘNG HÒA XÃ HỘI CHỦ NGHĨA VIỆT NAM Độc Lập – Tự Do – Hạnh Phúc
+
+--- Table 1 ---
+Mục | Nội dung
+Tên đề tài | Xây dựng hệ thống hỗ trợ phân nhóm sinh viên dựa trên giải thuật di truyền và các ràng buộc kỹ năng
+Nhóm thực hiện | Nhóm số 04
+Giảng viên hướng dẫn | TS. Nguyễn Văn Dũng
+
+--- Table 2 ---
+STT | Họ và Tên | MSV | Lớp | Vai trò | Email/SĐT
+1 | Nguyễn Đại Thắng | 24ATT244 | K11A2 | Trưởng nhóm | Daithang558@gmail.com 0336625407
+2 | Nguyễn Bá Bổng | 24ATT206 | K11A2 | Thành viên | 
+3 | Nguyễn Văn Khang | 24ATT228 | K11A2 | Thành viên | 
+4 | Cao Thị Quỳnh Như | 24ATT239 | K11A2 | Thành viên | nhuc9499@gmail.com 0977230322
+5 | Đường Thị Thuỳ Dương | 24ATT211 | K11A2 | Thành viên | Duongthithuyduongduong2006@gmail.com 0334279402
+
+--- Table 3 ---
+Mục tiêu | Nội dung
+Nghiệp vụ | Tiếp nhận dữ liệu sinh viên; cấu hình số nhóm và ràng buộc; tạo phương án; xem, điều chỉnh, công bố và xuất kết quả.
+Kỹ thuật | Mô hình hóa chromosome; triển khai population, Fitness, selection, crossover, mutation, repair và termination; xây dựng các metric đánh giá.
+Trải nghiệm | Xây dựng web responsive với Admin Panel và User Portal; Admin quản lý hệ thống, sinh viên chỉ tra cứu nhóm của mình.
+
+--- Table 4 ---
+STT | Họ tên thành viên | Nhiệm vụ đảm nhận | Công nghệ/ Kỹ năng cần dùng | Tỷ lệ hoàn thành dự kiến (%)
+1 | (Trưởng nhóm) | Quản lý tiến độ, thiết kế CSDL, viết API xử lý nghiệp vụ chính | MySQL/PostgreSQL, NodeJS/.NET | 30%
+2 | ................ | Phát triển giao diện (Front-end) & Responsive | ReactJS/Angular, HTML/CSS, Bootstrap | 25%
+3 | ................ | Xây dựng module bảo mật/ Xác thực & Kết nối 3rd Party | JWT, OAuth2, Firebase | 20%
+4 | ................ | Kiểm thử (Testing), viết Test-case, xử lý lỗi (Debug) | Postman, Selenium, JUnit | 15%
+5 | ................ | Viết báo cáo, làm Slide, quay Video Demo, tài liệu hướng dẫn | Word, PowerPoint, Camtasia | 10%
+
+--- Table 5 ---
+Hạng mục | Công nghệ | Lý do chọn
+Ngôn ngữ | Python, TypeScript | Python phù hợp GA/xử lý dữ liệu; TypeScript tăng tính an toàn cho React.
+GA | DEAP | Thư viện chuyên dụng cho Evolutionary Algorithms.
+Dữ liệu | Pandas, NumPy, openpyxl | Đọc Excel/CSV, làm sạch, chuẩn hóa và tính toán.
+Backend | FastAPI (tùy phạm vi prototype) | Cung cấp API giữa frontend và GA engine; có thể giản lược nếu cần.
+Frontend | React + TypeScript | Xây dựng Admin/User Portal hiện đại, responsive.
+CSDL | SQLite | Đơn giản, phù hợp quy mô đồ án và lưu lịch sử.
+Visualization | Recharts / thư viện tương đương | Biểu diễn Fitness, convergence, balance và benchmark.
+Export | Excel, CSV, Google Sheets API (tùy cấu hình) | Tải dữ liệu và mở rộng xuất kết quả.
+Version control | Git, GitHub | Quản lý phiên bản và phối hợp nhóm.
+IDE | Visual Studio Code | Môi trường phát triển Python và React/TypeScript.
+OS | Windows / Linux | Môi trường phát triển và triển khai linh hoạt.
+
+--- Table 6 ---
+Tuần | Trọng tâm | Công việc chính | Sản phẩm bàn giao
+1 | Chốt đề tài & yêu cầu | Chốt tên, mục tiêu, phạm vi; xác định Admin/User, input, use case và tiêu chí đánh giá. | Đặc tả yêu cầu; Use Case; Scope
+2 | Dữ liệu & Chromosome | Thiết kế schema; chuẩn hóa; chromosome dạng permutation; giải mã K nhóm; ví dụ 20 SV/4 nhóm. | Đặc tả kỹ thuật; dataset; chromosome mẫu
+3 | Fitness Function | Định nghĩa SkillBalance, SkillCoverage, PersonalityComplement, RoleCoverage, ConstraintViolation; chốt công thức/trọng số ban đầu. | Công thức Fitness; test case tính tay
+4 | Preprocessing | Tạo project; cài thư viện; đọc Excel/CSV; xử lý thiếu/sai; dataset 20/40/60 SV. | Skeleton; preprocessing; dataset
+5 | Population & Chromosome | Sinh nghiệm hợp lệ; giải mã nhóm; kiểm tra không trùng/mất SV và sĩ số; unit test. | Chromosome/Population module; tests
+6 | Fitness Implementation | Cài Fitness; đối chiếu test case tính tay; ghi log thành phần. | Fitness module; kết quả kiểm chứng
+7 | Crossover & Mutation | PMX/OX hoặc phép lai phù hợp; Swap Mutation; Repair; kiểm tra tính hợp lệ. | GA operators; unit tests
+8 | Hoàn thiện GA | Tournament Selection; Elitism; termination; lưu best solution và lịch sử Fitness. | GA end-to-end; convergence chart
+9 | Rule-based Explanation | Sinh giải thích từ metric Fitness; thiết kế báo cáo từng nhóm; kiểm tra nhất quán. | Explanation module
+10 | Random & Greedy | Cài baseline; thống nhất metric; chạy thử 20/40/60 SV. | Baseline; bảng sơ bộ
+11 | Evaluation & Benchmark | Chạy nhiều seed; thu Fitness/Balance/Coverage/Violations/Runtime; mean/min/max/std. | Benchmark dataset; CSV; biểu đồ
+12 | Web Demo & Storage | React Admin/User; upload; cấu hình; chạy GA; kết quả; SQLite; Excel/CSV; kiến trúc Google Sheets. | Prototype end-to-end
+13 | Kiểm thử & Báo cáo | Functional/data validation; GA/Fitness test; biểu đồ; báo cáo; thực nghiệm. | Bản beta; báo cáo gần hoàn thiện
+14 | Đóng gói & Bảo vệ | Chạy lại pipeline; chốt số liệu; slide; demo/Q&A; đóng gói source/dataset. | Final; slide; source; dataset; kịch bản demo
+
+--- Table 7 ---
+Mốc | Thời điểm | Yêu cầu
+M1 | Cuối tuần 3 | Đóng băng Chromosome + Fitness + Constraints
+M2 | Cuối tuần 6 | Fitness đúng và khớp test case tính tay
+M3 | Cuối tuần 8 | GA chạy end-to-end và tạo nghiệm hợp lệ
+M4 | Cuối tuần 11 | Benchmark Random/Greedy/GA trên nhiều seed
+M5 | Cuối tuần 12 | Prototype nhập dữ liệu → GA → kết quả → explanation
+M6 | Cuối tuần 14 | Hoàn tất báo cáo, slide, source, dataset, demo
+
+--- Table 8 ---
+Chức năng | Admin | Giảng viên | User
+Trang chủ / thông tin hệ thống | ✓ | ✓ | ✓
+Quản lý sinh viên & import dữ liệu | ✓ | ✓ | –
+Tạo/cấu hình phân nhóm | ✓ | ✓ | –
+Chạy GA | ✓ | ✓ | –
+Xem Fitness/benchmark/phân tích | ✓ | ✓ | –
+Chỉnh sửa/kiểm duyệt và công bố nhóm | ✓ | ✓ | –
+Excel/CSV/Google Sheets | ✓ | ✓ | –
+Lịch sử & xóa nhiều bản ghi | ✓ | ✓ | –
+Quản lý User/Settings | ✓ | ✓ | –
+Tra cứu nhóm của bản thân | ✓ | ✓ | ✓
+Xem thành viên nhóm | ✓ | ✓ | ✓
+
+--- Table 9 ---
+Rủi ro | Mức độ | Phương án xử lý
+GA không hội tụ / Fitness không cải thiện | Cao | Kiểm tra Fitness; thử mutation/population/generations; chạy nhiều seed; báo cáo mean/std.
+Crossover tạo nghiệm lỗi | Cao | Dùng PMX/OX hoặc phép lai phù hợp; Repair; unit test không trùng/mất SV và đủ sĩ số.
+Fitness sai | Cao | Đóng băng công thức tuần 3; kiểm chứng bằng test case tính tay.
+Excel thiếu/sai dữ liệu | TB | Validation trước khi chạy; chỉ rõ dòng/cột lỗi; cung cấp template.
+Lỗi tích hợp React/API | TB | Tách service API; mock data trong giai đoạn UI; kiểm thử API độc lập.
+Google Sheets không cấu hình được | TB | Không coi là dependency bắt buộc; vẫn hỗ trợ Excel/CSV.
+Không đủ thời gian | TB | Ưu tiên GA, Fitness, benchmark và prototype; giản lược FastAPI/tính năng phụ nếu cần.
+Benchmark không công bằng | TB | Cùng dataset, ràng buộc, metric và nhiều seed cho các phương pháp.
+Dữ liệu giả lập chưa sát thực tế | Thấp | Nhiều kịch bản dữ liệu; nêu rõ giới hạn trong báo cáo.
+
+--- Table 10 ---
+ | Ngày ..... tháng ..... năm 2026 Xác nhận của Trưởng nhóm: (Ký và ghi rõ họ tên)

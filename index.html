@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="vi" class="h-full bg-[#f8fafc]">
+  <head>
+    <script>
+      (function() {
+        try {
+          var _origFetch = window.fetch ? window.fetch.bind(window) : undefined;
+          var _customFetch = _origFetch;
+          Object.defineProperty(window, 'fetch', {
+            get: function() {
+              return _customFetch || _origFetch;
+            },
+            set: function(fn) {
+              _customFetch = fn;
+            },
+            configurable: true,
+            enumerable: true
+          });
+        } catch (e) {
+          // Graceful fallback
+        }
+      })();
+    </script>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="icon" type="image/png" href="/logo.png" />
+    <title>NOVIARA — Genetic Algorithm Student Team Formation Portal</title>
+    <meta name="description" content="Hệ thống thông minh phân nhóm sinh viên dựa trên Giải thuật Di truyền (Genetic Algorithm), DISC, Kỹ năng và Ràng buộc học thuật." />
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
+  </head>
+  <body class="h-full antialiased text-zinc-950 bg-[#eef2f6] font-sans selection:bg-blue-600 selection:text-white">
+    <div id="root" class="min-h-full"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>
+

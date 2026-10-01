@@ -1,0 +1,169 @@
+=== Ke_hoach_NOVIARA_14_tuan_Chi_Tiet.docx PARAGRAPHS ===
+BỘ GIÁO DỤC VÀ ĐÀO TẠO — KHOA CÔNG NGHỆ THÔNG TIN
+KẾ HOẠCH TRIỂN KHAI & BÁO CÁO THỰC HIỆN ĐỒ ÁN 14 TUẦN
+DỰ ÁN: NOVIARA — HỆ THỐNG HỖ TRỢ PHÂN NHÓM SINH VIÊN THÔNG MINH
+(GENETIC ALGORITHM & MA TRẬN TÍNH CÁCH DISC)
+PHẦN I: THÔNG TIN TỔNG QUAN & MỤC TIÊU ĐỀ TÀI
+Tên đề tài: Xây dựng hệ thống hỗ trợ phân nhóm sinh viên dựa trên giải thuật di truyền và các ràng buộc kỹ năng (NOVIARA).
+Đơn vị thực hiện: Nhóm sinh viên nghiên cứu — Khoa Công nghệ Thông tin.
+Mục tiêu tổng quát: Xây dựng và hoàn thiện nền tảng phần mềm NOVIARA có khả năng tự động hóa quy trình phân chia nhóm sinh viên làm bài tập lớn/đồ án. Hệ thống tiếp nhận hồ sơ năng lực sinh viên (học vấn, kỹ năng lập trình Web, CSDL, OOP và tính cách theo trắc nghiệm DISC), mô hình hóa thành bài toán tối ưu tổ hợp đa mục tiêu, giải bằng Giải thuật Di truyền (Genetic Algorithm - GA), cung cấp giải thích minh bạch theo luật (Rule-based Explanation) kết hợp AI Agent, và hiển thị trực quan trên giao diện Web Full-Stack hiện đại.
+PHẦN II: BẢNG KẾ HOẠCH TỔNG HỢP 14 TUẦN (GỐC & THỰC THI THỰC TẾ)
+PHẦN III: TỔNG HỢP CHI TIẾT CÁC CÔNG VIỆC VÀ SỬA ĐỔI KỸ THUẬT THỰC TẾ (NOVIARA)
+Trong quá trình phát triển thực tế, nhóm đã ghi nhận nhiều phản hồi kỹ thuật (Team Reviews) và tiến hành các bước tối ưu hóa sâu sắc nhằm đưa NOVIARA thành một nền tảng Web có tính ứng dụng cao, vượt xa một prototype học thuật thuần túy:
+1. Tích hợp Kiến trúc Full-Stack (React TypeScript + Python FastAPI)
+• Kế thừa lõi toán học: Toàn bộ các thuật toán tối ưu từ thư mục NOVIARA_python (chromosome, fitness, ga_operators, ga_engine, baseline, benchmark, explanation) được bọc vào các Service chuyên biệt trong backend/.
+• Hệ thống Pydantic Models đồng bộ: Xây dựng schemas.py đồng nhất 100% với các Interface TypeScript của React, đảm bảo tính toàn vẹn dữ liệu từ Backend sang Frontend.
+• Streaming thời gian thực qua SSE: Thay vì chạy đồng bộ chờ đợi lâu, hệ thống triển khai endpoint /api/ga/run/stream qua Server-Sent Events, gửi chỉ số từng thế hệ (Generation) về vẽ biểu đồ Recharts trực tiếp trên React.
+• Cơ chế Dual-Engine Dự phòng: Frontend được trang bị song song bộ giải mã GA thuần Client (TypeScript). Nếu Backend Python gặp sự cố kết nối, hệ thống tự động Fallback chạy Client-side, đảm bảo trải nghiệm demo không bị gián đoạn.
+2. Xử lý Dữ liệu Thông minh & Khắc phục Lỗi Import/Export
+• Fuzzy Matching đa ngôn ngữ: Hệ thống tự động nhận dạng các cột dữ liệu tiếng Việt có dấu, không dấu hoặc tiếng Anh (MSSV, Họ tên, Điểm CSDL, Web, Lập trình, Điểm DISC D-I-S-C, Phong cách học).
+• Bảo vệ ứng dụng bằng ErrorBoundary: Xử lý triệt để lỗi màn hình trắng khi người dùng tải lên file dữ liệu bị thiếu trường hoặc chứa ký tự đặc biệt, thông báo lỗi tường minh trên giao diện.
+• Sửa lỗi dữ liệu dính cột khi tải file (Export Fix): Nâng cấp export_service.py sử dụng openpyxl để tạo file Excel đa sheet chuyên nghiệp: Sheet 1 (Tổng quan lớp và các chỉ số) và các Sheet riêng cho từng Nhóm. Bổ sung ký tự BOM (\uFEFF) cho file CSV giúp Excel hiển thị tiếng Việt chuẩn 100%, phân tách cột rõ ràng.
+3. Tái cấu trúc Toàn diện UI/UX (Cinematic Liquid Glass & 3D Interactive)
+• Full-Viewport Hero (100vh): Xây dựng trang chủ không gian điện ảnh với video nền chuyển động mượt mà, áp dụng ngôn ngữ thiết kế kính lỏng (Liquid Glass) viền sáng quang học theo chuẩn Google Font Inter.
+• Hiệu ứng chữ đánh máy (Typing Animation): Bổ sung hiệu ứng typing động lặp lại chu kỳ 10 giây tại trang chủ, nhấn mạnh thông điệp công nghệ phân nhóm bằng AI.
+• Điều chỉnh thị giác & Chống mỏi mắt: Thay thế tông màu xanh chói cũ bằng nền sáng giảm độ chói (matte light theme), tăng độ tương phản của chữ đen, thanh header trong suốt 70% và bổ sung màu nhấn khi hover.
+• Thẻ khối 3D cho GA & DISC Matrix: Thiết kế các khối thông tin giải thuật theo phong cách 3D (trên trắng dưới đen, hiệu ứng chìm xuống khi tương tác chuột), viền mờ kính xuyên thấu.
+• Khắc phục triệt để lỗi Màn hình đen khi phát video nền: Xác định nguyên nhân video gốc mã hóa chuẩn H.265/HEVC bị Chrome/Windows chặn; tiến hành chuyển mã bằng ffmpeg sang H.264/AVC (avc1 + yuv420p + faststart); kích hoạt autoplay qua React videoRef với defaultMuted=true.
+4. Phân quyền Người dùng, Quản trị & Tích hợp Gemini AI
+• Chuẩn hóa tài khoản Demo: Làm sạch danh sách tài khoản mẫu, cấu hình sẵn 1 tài khoản Admin tối cao và 1 tài khoản Giảng viên với bộ phím tắt đăng nhập 1-click tại AdminLogin.tsx.
+• Sửa lỗi mất AI Agent khi điều hướng: Đưa trạng thái AI Lecturer Agent lên tầng ứng dụng gốc (App.tsx), đảm bảo Giảng viên khi chuyển đổi qua lại giữa cổng Sinh viên và Quản trị không bao giờ bị mất trợ lý.
+• Tích hợp Gemini 3.6 Flash: Đọc cấu hình động từ .env, hỗ trợ phân tích chuyên sâu mối quan hệ tâm lý giữa các thành viên, phát hiện nguy cơ xung đột và đề xuất phong cách quản lý cho Trưởng nhóm.
+PHẦN IV: NỘI DUNG THỰC THI CHI TIẾT TỪNG TUẦN (TUẦN 1 — TUẦN 14)
+Tuần 1: Khởi động đề tài, Khảo sát nghiệp vụ & Đặc tả yêu cầu
+Mục tiêu trọng tâm: Thiết lập nền móng bài toán, xác định các tiêu chí phân nhóm và mô hình người dùng.
+• Khảo sát bài toán: Nghiên cứu các phương pháp phân nhóm truyền thống (ngẫu nhiên, sinh viên tự chọn, giảng viên chỉ định) và các hạn chế thường gặp (lệch trình độ, nhóm toàn người thích chỉ đạo hoặc toàn người thụ động).
+• Xác định đầu vào: Thiết lập các trường dữ liệu: MSSV, Họ tên, Điểm CSDL, Điểm Web, Điểm Lập trình OOP, Điểm trắc nghiệm 4 nhóm DISC (Dominance, Influence, Steadiness, Conscientiousness), nguyện vọng làm Leader.
+• Xác định người dùng: Giảng viên (tải file danh sách, cấu hình số lượng nhóm K, trọng số thuật toán, xem kết quả, xuất báo cáo) và Sinh viên (tra cứu nhóm qua MSSV, xem thẻ năng lực cá nhân và đồng đội).
+• Phạm vi dự án: Xác định rõ phạm vi thuật toán: Tập trung vào GA với hoán vị permutation, đối sánh với Random và Greedy.
+Sản phẩm bàn giao: Bản đặc tả yêu cầu nghiệp vụ; Sơ đồ Use Case; Phân định phạm vi In/Out Scope.
+Tuần 2: Mô hình hóa dữ liệu, Chuẩn hóa điểm số & Cấu trúc Chromosome
+Mục tiêu trọng tâm: Chuyển đổi bài toán thực tế thành cấu trúc nhiễm sắc thể phù hợp với giải thuật di truyền.
+• Thiết kế Schema sinh viên: Xây dựng định dạng chuẩn JSON cho hồ sơ học tập và tính cách của sinh viên.
+• Chuẩn hóa dữ liệu: Đưa các cột điểm học phần về thang 10; chuẩn hóa các giá trị DISC về dạng tỷ lệ phần trăm phân bố trên 4 trục.
+• Thiết kế Chromosome: Sử dụng biểu diễn hoán vị (Permutation Encoding) gồm N chỉ số sinh viên. Phương pháp này đảm bảo không bao giờ xảy ra tình trạng sinh viên bị lặp lại hoặc bị bỏ rơi.
+• Xây dựng Decoder: Giải mã hoán vị thành K nhóm theo công thức chia đều sĩ số: base_size = N // K, remainder = N % K. Remainder nhóm đầu tiên nhận base_size + 1 sinh viên.
+Sản phẩm bàn giao: Tài liệu đặc tả kỹ thuật v2; Dataset mẫu 20 SV / 4 nhóm; Mã nguồn giải mã Chromosome.
+Tuần 3: Xây dựng Hàm Thích Nghi Đa Mục Tiêu (Multi-Objective Fitness)
+Mục tiêu trọng tâm: Xây dựng công thức toán học đo lường chất lượng của phương án phân nhóm.
+• Chỉ số Balance: Đo độ đồng đều về mặt năng lực học thuật giữa các nhóm: Balance = 1 / (1 + std(group_scores)).
+• Chỉ số Skill Coverage: Đánh giá tỷ lệ phần trăm các nhóm có đủ thành viên nắm các mảng kỹ năng cốt lõi (Frontend, Backend, Database).
+• Chỉ số DISC Complementarity: Sử dụng độ hỗn loạn thông tin Shannon Entropy chuẩn hóa để đo lường độ đa dạng tính cách trong nhóm, ưu tiên nhóm có đủ các vai trò D-I-S-C bổ trợ nhau.
+• Hàm phạt Violation: Phạt điểm nặng các nhóm vi phạm ràng buộc cứng (thiếu Leader, thiếu hoàn toàn 1 mảng kỹ năng, hoặc sĩ số nhóm không hợp lệ).
+• Tính toán thủ công: Thực hiện tính toán bằng tay trên tập dữ liệu mẫu 20 sinh viên để làm chuẩn đối chiếu.
+Sản phẩm bàn giao: Tài liệu công thức toán học hàm Fitness; Bảng số liệu tính tay mẫu.
+Tuần 4: Thiết lập Môi trường & Module Tiền xử lý (Smart Preprocessing)
+Mục tiêu trọng tâm: Xây dựng khả năng đọc và xử lý thông minh các file dữ liệu thực tế.
+• Môi trường Python: Cài đặt Python 3.11, cấu hình virtual environment, cài đặt numpy, pandas, openpyxl.
+• Smart Upload: Phát triển thuật toán Fuzzy Matching tự động nhận dạng các tiêu đề cột tiếng Việt/tiếng Anh, không phân biệt chữ hoa, chữ thường hay dấu cách.
+• Xử lý dữ liệu khuyết: Tự động điền giá trị trung bình hợp lý hoặc cảnh báo giảng viên nếu thiếu các thông tin cốt lõi (MSSV, Họ tên).
+• Sinh Dataset: Tạo các bộ dữ liệu thử nghiệm chuẩn hóa gồm 20, 40, và 60 sinh viên với các phân bố điểm và tính cách đa dạng.
+Sản phẩm bàn giao: Module preprocessing.py và smart_upload.py; 3 bộ dữ liệu thử nghiệm 20, 40, 60 sinh viên.
+Tuần 5: Lập trình Khởi tạo Quần thể & Kiểm chứng Tính toàn vẹn
+Mục tiêu trọng tâm: Khởi tạo không gian tìm kiếm và đảm bảo nghiệm luôn hợp lệ.
+• Khởi tạo Quần thể: Lập trình hàm sinh ngẫu nhiên P cá thể (mỗi cá thể là 1 hoán vị ngẫu nhiên của N sinh viên).
+• Chia nhóm tự động: Lập trình hàm giải mã mảng sinh viên thành các nhóm với sĩ số cân đối nhất.
+• Unit Testing: Viết bộ kiểm thử tự động xác minh: 100% sinh viên được xếp nhóm, không sinh viên nào xuất hiện ở 2 nhóm, không có nhóm rỗng.
+Sản phẩm bàn giao: Module chromosome.py; Bộ Unit Tests kiểm tra tính toàn vẹn đạt 100% pass.
+Tuần 6: Cài đặt Hàm Thích Nghi & Đối soát Số liệu Khớp 100%
+Mục tiêu trọng tâm: Lập trình hàm Fitness và kiểm chứng độ chính xác với tính toán thủ công.
+• Cài đặt Fitness: Lập trình đầy đủ các thành phần điểm: Balance, Coverage, DISC Entropy, Penalty trong fitness.py.
+• Tối ưu hiệu năng: Ứng dụng thư viện numpy để vector hóa các phép tính ma trận điểm, rút ngắn thời gian đánh giá quần thể.
+• Đối soát thực nghiệm: Chạy hàm Fitness trên dữ liệu 20 sinh viên từ Tuần 3, đối chiếu từng chữ số thập phân với bảng tính tay để đảm bảo code chạy chính xác tuyệt đối.
+• Logging chi tiết: Bổ sung khả năng log chi tiết điểm số từng nhóm phục vụ hiển thị báo cáo.
+Sản phẩm bàn giao: Module fitness.py; Bảng đối soát khớp số liệu tính tay 100%; Log thành phần điểm.
+Tuần 7: Lập trình Toán tử Di truyền (PMX Crossover & Swap Mutation)
+Mục tiêu trọng tâm: Cài đặt các toán tử di truyền đặc thù cho bài toán hoán vị.
+• Toán tử PMX Crossover: Cài đặt thuật toán Partially Mapped Crossover: chọn 2 điểm cắt, hoán đổi đoạn gene giữa và xây dựng ánh xạ để điền các gene còn lại mà không gây trùng lặp.
+• Toán tử Swap Mutation: Chọn ngẫu nhiên 2 vị trí trong hoán vị và đổi chỗ cho nhau với xác suất đột biến Pm.
+• Chiến lược Elitism: Giữ lại Top 2-5% cá thể có Fitness cao nhất của thế hệ cha mẹ sang thẳng thế hệ con cháu.
+• Thử nghiệm 1 thế hệ: Chạy hoàn chỉnh 1 chu trình di truyền và kiểm tra tính hợp lệ của toàn bộ cá thể con sinh ra.
+Sản phẩm bàn giao: Module ga_operators.py; Unit Tests kiểm thử toán tử di truyền; Bản demo 1 thế hệ.
+Tuần 8: Hoàn thiện GA Engine & Khảo nghiệm Siêu tham số
+Mục tiêu trọng tâm: Lắp ráp toàn bộ hệ thống GA hoạt động liên tục và tìm bộ tham số tối ưu.
+• Hoàn thiện Vòng lặp GA: Lập trình ga_engine.py: Khởi tạo quần thể -> Đánh giá Fitness -> Chọn lọc bánh xe số (Roulette Wheel / Tournament) -> Lai ghép PMX -> Đột biến Swap -> Bảo tồn Elitism -> Lặp qua G thế hệ.
+• Theo dõi Hội tụ: Lưu trữ lịch sử Best Fitness và Mean Fitness qua từng thế hệ để vẽ biểu đồ đường cong tiến hóa.
+• Khảo nghiệm Tham số: Thử nghiệm kích thước quần thể (50, 100, 150), số thế hệ (50, 100, 200), tỷ lệ đột biến (0.02, 0.05, 0.1) để chọn ra bộ thông số cân bằng giữa chất lượng và thời gian.
+Sản phẩm bàn giao: Lõi ga_engine.py hoàn chỉnh; Biểu đồ đường cong hội tụ Fitness.
+Tuần 9: Xây dựng Module Diễn giải (Rule-Based & Gemini AI Explanation)
+Mục tiêu trọng tâm: Minh bạch hóa kết quả phân nhóm cho Giảng viên và Sinh viên.
+• Rule-based Explanation: Xây dựng các bộ quy tắc tự động sinh nhận xét: 'Nhóm mạnh về Database nhờ SV A, có khả năng gắn kết cao nhờ SV B (nhóm I), SV C giữ vai trò Leader (nhóm D)...'.
+• Gợi ý phối hợp: Đưa ra lời khuyên làm việc nhóm dựa trên sự kết hợp tính cách DISC để giảm thiểu xung đột.
+• Tích hợp Gemini AI: Mở rộng tính năng phân tích chuyên sâu: Gửi cấu trúc nhóm lên mô hình Gemini 3.6 Flash để sinh báo cáo sư phạm chi tiết và kế hoạch làm việc nhóm gợi ý.
+Sản phẩm bàn giao: Module explanation.py; Mẫu phiếu báo cáo phân tích nhóm; Tích hợp Gemini AI.
+Tuần 10: Xây dựng Thuật toán Cơ sở (Random & Greedy Baseline)
+Mục tiêu trọng tâm: Xây dựng hệ quy chiếu để so sánh và chứng minh hiệu quả của GA.
+• Random Grouping: Lập trình thuật toán chia nhóm ngẫu nhiên bằng cách xáo trộn danh sách và chia đều.
+• Greedy Heuristic: Lập trình thuật toán tham lam: Sắp xếp sinh viên theo điểm tổng hợp giảm dần, chia vòng tròn (Round-robin) vào K nhóm nhằm cân bằng điểm số cơ bản.
+• Chuẩn hóa đối sánh: Đưa kết quả của Random và Greedy qua cùng một hàm đánh giá Fitness của GA để so sánh công bằng trên cùng thang đo.
+Sản phẩm bàn giao: Module baseline.py; Bảng đối sánh sơ bộ điểm số giữa GA, Greedy và Random.
+Tuần 11: Thực nghiệm Chuyên sâu & Đối chuẩn Đa Thuật toán (Benchmark)
+Mục tiêu trọng tâm: Thu thập bằng chứng thực nghiệm khoa học trên nhiều seed ngẫu nhiên.
+• Kịch bản 30 Seeds: Thiết lập kịch bản chạy benchmark trên 30 seed ngẫu nhiên độc lập cho từng thuật toán (GA, Greedy, Random) trên 3 tập dữ liệu (20, 40, 60 sinh viên).
+• Thu thập chỉ số: Ghi nhận: Fitness lớn nhất, Fitness trung bình, độ lệch chuẩn, điểm Balance, điểm Coverage, vi phạm ràng buộc và thời gian thực thi (Runtime).
+• Phân tích dữ liệu: Chứng minh bằng số liệu: GA vượt trội hoàn toàn so với Random; GA vượt trội so với Greedy ở tính đa mục tiêu (Greedy chỉ cân bằng điểm nhưng DISC bị phân tán, trong khi GA tối ưu hài hòa cả hai).
+Sản phẩm bàn giao: Module benchmark.py; Báo cáo Benchmark khoa học; Tập dữ liệu CSV/log kết quả thực nghiệm.
+Tuần 12: Xây dựng Hệ thống Full-Stack (FastAPI Backend + React Frontend)
+Mục tiêu trọng tâm: Hiện thực hóa nền tảng Web hiện đại phục vụ đồng thời cả Giảng viên và Sinh viên.
+• Backend FastAPI: Đóng gói toàn bộ mã nguồn GA thành các API RESTful chuyên nghiệp (/api/ga/run, /api/upload, /api/export).
+• Streaming SSE: Triển khai Server-Sent Events tại /api/ga/run/stream để đẩy tiến trình từng thế hệ trực tiếp lên biểu đồ Recharts của React.
+• Frontend React: Xây dựng Cổng tra cứu sinh viên (StudentPortal) tra cứu theo MSSV, xem thẻ nhóm, radar năng lực; xây dựng Không gian quản trị (AdminDashboard, GroupingWizard) cho Giảng viên tải file, chỉnh tham số và duyệt nhóm.
+• Xuất báo cáo đa dạng: Tích hợp tính năng xuất file Excel đa sheet phân nhóm và file CSV chuẩn hóa.
+Sản phẩm bàn giao: Hệ thống Full-Stack Web kết nối hoàn chỉnh giữa React Frontend và FastAPI Backend.
+Tuần 13: Tái thiết kế UI/UX Cinematic Liquid Glass, Khắc phục lỗi & Kiểm thử
+Mục tiêu trọng tâm: Nâng cấp toàn diện thẩm mỹ thị giác và độ tin cậy của phần mềm theo phản hồi thực tế.
+• Giao diện Liquid Glass: Tái thiết kế Landing Hero 100vh theo ngôn ngữ kính lỏng mờ cao cấp, viền sáng quang học, typing animation chu kỳ 10s, thẻ 3D DISC/GA.
+• Chống chói thị giác: Điều chỉnh tông màu nền sang trắng mờ dịu mắt, tăng độ tương phản của chữ đen, thanh header trong suốt 70%.
+• Khắc phục triệt để lỗi Video nền: Chuyển mã video public/video.mp4 từ H.265/HEVC sang H.264 High Profile (avc1 + yuv420p + faststart), kích hoạt autoplay qua React videoRef với defaultMuted=true.
+• Khắc phục lỗi Import/Export: Bọc ErrorBoundary bắt lỗi giao diện; sửa lỗi dính cột khi tải file Excel/CSV bằng openpyxl và UTF-8 BOM.
+• Khắc phục lỗi Phân quyền: Chuẩn hóa 1 tài khoản Admin và 1 Giảng viên demo; sửa lỗi mất AI Agent khi điều hướng giữa các trang.
+• Kiểm thử tự động: Chạy bộ 8 bài test Pytest Backend và kiểm tra TypeScript (tsc --noEmit) đạt 0 lỗi biên dịch.
+Sản phẩm bàn giao: Phiên bản ứng dụng Release Candidate (RC) hoàn thiện cao; Biên bản kiểm thử hệ thống.
+Tuần 14: Đóng gói Sản phẩm, Hoàn thiện Báo cáo & Chuẩn bị Bảo vệ
+Mục tiêu trọng tâm: Hoàn thiện toàn bộ hồ sơ nghiệm thu đồ án và sẵn sàng bảo vệ trước Hội đồng.
+• Rà soát toàn diện: Kiểm tra lại toàn bộ quy trình: Nạp file -> Chạy GA realtime -> Xem kết quả & Phân tích AI -> Xuất Excel -> Sinh viên tra cứu.
+• Báo cáo đồ án: Hoàn thiện bản thuyết minh đồ án chính thức: Cơ sở lý thuyết GA, mô hình toán học hàm Fitness, phân tích kết quả Benchmark thực nghiệm, thảo luận về giới hạn của dữ liệu giả lập và mô hình DISC.
+• Slide thuyết trình: Thiết kế bộ Slide báo cáo trực quan, tóm tắt cô đọng bài toán, thuật toán và kết quả đạt được.
+• Kịch bản Demo & Q&A: Xây dựng kịch bản trình diễn phần mềm trực tiếp (Live Demo) và chuẩn bị các câu hỏi phản biện chuyên sâu của Hội đồng.
+• Đóng gói: Đóng gói mã nguồn sạch, file hướng dẫn cài đặt README.md, dataset demo và video ghi hình dự phòng.
+Sản phẩm bàn giao: Trọn bộ mã nguồn dự án; Báo cáo đồ án PDF/Word; Slide bảo vệ; Kịch bản demo và bộ câu hỏi Q&A.
+PHẦN V: BẢNG ĐỐI SOÁT GIỮA KẾ HOẠCH GỐC VÀ HIỆN THỰC HÓA THỰC TẾ
+PHẦN VI: TIÊU CHUẨN NGHIỆM THU SẢN PHẨM & KỊCH BẢN BẢO VỆ
+Để đạt điểm số tối đa trong buổi bảo vệ trước Hội đồng chấm thi, sản phẩm NOVIARA được hoàn thiện đáp ứng toàn bộ các tiêu chí nghiệm thu khắt khe sau:
+• Tính đúng đắn của thuật toán: Phân chia được 20 đến 60 sinh viên thành K nhóm hợp lệ 100%, không trùng sinh viên, không mất sinh viên, sĩ số đồng đều tuyệt đối.
+• Đa mục tiêu tối ưu: Hàm thích nghi phản ánh đầy đủ: Cân bằng điểm số (Balance), Độ phủ kỹ năng (Coverage), Bổ trợ tính cách (DISC Entropy) và Phạt vi phạm (Violations).
+• Giá trị thực nghiệm khoa học: Có số liệu đối sánh thuyết phục giữa GA với Random và Greedy trên 30 seeds; có thời gian thực thi (Runtime) đo đạc thực tế trên phần cứng máy tính.
+• Tính minh bạch & Trí tuệ nhân tạo: Mỗi nhóm sinh viên đều có bảng phân tích lý do ghép nhóm rõ ràng và nhận xét chuyên môn từ Gemini AI Agent.
+• Tính hoàn thiện phần mềm: Giao diện Web Full-Stack hoạt động mượt mà, hỗ trợ cả 2 đối tượng Giảng viên và Sinh viên, video nền và các hiệu ứng trực quan không bị lỗi.
+• Tính trung thực học thuật: Báo cáo nêu rõ các giả định của bài toán, giới hạn của dữ liệu mô phỏng và thừa nhận DISC là tiêu chí hỗ trợ chứ không mang tính quyết định tuyệt đối.
+
+=== Ke_hoach_NOVIARA_14_tuan_Chi_Tiet.docx TABLES ===
+
+--- Table 0 ---
+📌 NGUYÊN TẮC THỰC THI: Dự án được định hướng bám sát nghiêm ngặt tiến trình 14 tuần của Đồ án Cơ sở ngành CNTT. Toàn bộ các cải tiến kỹ thuật, sửa đổi giao diện và khắc phục lỗi thực tế đều được ghi nhận đầy đủ, không pha tạp với bất kỳ dự án nào khác.
+
+--- Table 1 ---
+Tuần | Trọng tâm giai đoạn | Nội dung triển khai chi tiết | Sản phẩm đầu ra bàn giao
+Tuần 1 | Chốt đề tài & Đặc tả yêu cầu | Xác định bài toán phân nhóm học thuật; xác định đầu vào (kỹ năng, DISC, nguyện vọng Leader); xác định 2 tác nhân Giảng viên và Sinh viên; chọn GA làm thuật toán chính, Random & Greedy làm baseline. | Tài liệu đặc tả yêu cầu; Sơ đồ Use Case; Tài liệu phân định phạm vi (Scope In/Out).
+Tuần 2 | Mô hình hóa dữ liệu & Chromosome | Thiết kế Schema sinh viên; chuẩn hóa điểm kỹ năng [0-10] và vector DISC; lựa chọn biểu diễn Chromosome dạng hoán vị (Permutation Encoding) loại bỏ trùng/sót SV; xây dựng Decoder giải mã thành K nhóm. | Đặc tả kỹ thuật v2; Dataset mẫu 20 SV / 4 nhóm; Thuật toán Decoder mẫu.
+Tuần 3 | Thiết kế Hàm Thích Nghi (Fitness) | Xây dựng công thức định lượng đa mục tiêu: Balance Score (nghịch đảo độ lệch chuẩn), Skill Coverage (độ phủ kỹ năng Web/DB/OOP), DISC Complementarity (Shannon Entropy), và Penalty (phạt vi phạm). | Tài liệu toán học hàm Fitness; Bộ test case tính toán thủ công bằng tay để đối chiếu.
+Tuần 4 | Môi trường & Smart Preprocessing | Khởi tạo cấu trúc dự án; cài đặt thư viện numpy, pandas, openpyxl; xây dựng module xử lý Excel/CSV tự động nhận diện cột mờ (Fuzzy Matching); xử lý dữ liệu khuyết; sinh dataset 20, 40, 60 SV. | Skeleton project; Module preprocessing.py và smart_upload.py; 3 tập dataset chuẩn hóa.
+Tuần 5 | Khởi tạo Quần thể & Kiểm soát ràng buộc | Lập trình sinh quần thể ngẫu nhiên từ các hoán vị hợp lệ; thuật toán chia nhóm tự động xử lý số dư sĩ số; viết bộ Unit Test kiểm tra tính toàn vẹn 100% sinh viên không trùng/mất. | Module chromosome.py; Module khởi tạo Population; Bộ kiểm thử Unit Tests.
+Tuần 6 | Lập trình & Đối soát Hàm Fitness | Lập trình toàn bộ thành phần hàm Fitness; tối ưu hóa vector hóa với numpy; chạy thử nghiệm trên bộ dữ liệu 20 SV và so khớp số liệu đạt 100% khớp với bảng tính tay Tuần 3; bổ sung logging. | Module fitness.py; Bảng đối soát khớp số liệu tính tay; Hệ thống log chi tiết.
+Tuần 7 | Toán tử di truyền (PMX & Swap) | Cài đặt toán tử lai ghép bảo toàn hoán vị PMX (Partially Mapped Crossover); cài đặt đột biến hoán đổi Swap Mutation; tích hợp chiến lược tinh hoa (Elitism); chạy thử nghiệm 1 thế hệ (generation). | Module ga_operators.py; Unit Tests kiểm thử tính hợp lệ con lai; Demo 1 thế hệ.
+Tuần 8 | Hoàn thiện GA Engine & Khảo nghiệm | Hoàn thiện vòng lặp GA End-to-End qua G thế hệ; lưu trữ cá thể tối ưu và mảng biến thiên Fitness; khảo nghiệm bộ siêu tham số (Kích thước quần thể, tỷ lệ lai ghép, tỷ lệ đột biến). | Lõi ga_engine.py hoàn chỉnh; Biểu đồ đường cong hội tụ Fitness qua các thế hệ.
+Tuần 9 | Module Diễn giải (Rule-based & AI) | Xây dựng bộ sinh giải thích tự động theo luật (Rule-based) về thế mạnh kỹ thuật, vai trò DISC và gợi ý phối hợp; kết nối mô hình Gemini AI phân tích chuyên sâu chất lượng sư phạm. | Module explanation.py; Mẫu phiếu đánh giá chất lượng nhóm; Tích hợp Gemini AI.
+Tuần 10 | Thuật toán cơ sở (Random & Greedy) | Cài đặt Random Grouping và Greedy Heuristic chia vòng tròn; chuẩn hóa đầu ra khớp định dạng GA; chạy thử nghiệm trên 20, 40, 60 sinh viên và so sánh chỉ số cơ bản. | Module baseline.py; Bảng so sánh chỉ số sơ bộ giữa 3 thuật toán.
+Tuần 11 | Thực nghiệm Benchmark chuyên sâu | Chạy kịch bản 30 seed ngẫu nhiên độc lập; đo đạc Fitness, Balance, Coverage, Violations và Thời gian chạy thực tế (Runtime); tính mean, min, max, std; chứng minh tính ưu việt của GA. | Module benchmark.py; Báo cáo Benchmark khoa học; Tập dữ liệu CSV/log thực nghiệm.
+Tuần 12 | Phát triển Full-Stack Web App | Xây dựng FastAPI Backend bọc lõi GA; mở endpoint SSE streaming tiến trình hội tụ realtime; xây dựng React Frontend (Vite + TS + Tailwind) với Cổng sinh viên tra cứu và Cổng quản trị phân nhóm. | FastAPI backend (backend/); React frontend (src/); Cơ chế Server-Sent Events (SSE).
+Tuần 13 | Nâng cấp UI/UX Liquid Glass & Fix lỗi | Thiết kế lại Hero Full-Viewport, hiệu ứng Liquid Glass, thẻ 3D DISC, typing animation; transcode video nền H.264 tránh màn đen; sửa lỗi xuất Excel đa sheet tách cột; fix lỗi mất AI Agent. | Giao diện Cinematic Liquid Glass hoàn chỉnh; ErrorBoundary; Bộ 8 test Pytest pass 100%.
+Tuần 14 | Đóng gói, Viết báo cáo & Bảo vệ | Rà soát toàn bộ pipeline; chốt số liệu thực nghiệm; hoàn thiện bản báo cáo đồ án; thiết kế Slide thuyết trình; xây dựng kịch bản Live Demo và bộ câu hỏi phản biện Q&A. | Source code sạch; Báo cáo đồ án PDF/Word; Slide bảo vệ; Video demo dự phòng; Q&A.
+
+--- Table 2 ---
+Hạng mục đối soát | Kế hoạch ban đầu (Docx gốc) | Hiện thực hóa & Nâng cấp thực tế
+Kiến trúc ứng dụng | Streamlit đơn giản hoặc CLI script, chạy cục bộ. | Full-Stack hiện đại: React (Vite, TypeScript, Tailwind) + FastAPI Backend (Python 3.11).
+Cơ chế thực thi GA | Chạy ngầm đơn luồng, hiển thị kết quả tĩnh sau khi tính xong. | Streaming từng thế hệ thời gian thực qua Server-Sent Events (SSE) + Fallback Client-side JS.
+Trải nghiệm giao diện (UI/UX) | Giao diện chuẩn công cụ kỹ thuật cơ bản. | Cinematic Liquid Glass, Full-Viewport Hero, Video nền H.264, hiệu ứng thẻ 3D DISC, Typing animation.
+Cơ chế giải thích (Explanation) | Chỉ có mẫu câu sinh theo luật cố định (Rule-based). | Hybrid: Kết hợp Rule-based logic và Gemini 3.6 Flash AI Agent sinh nhận xét sư phạm sâu sắc.
+Xuất nhập dữ liệu | Đọc/ghi CSV cơ bản. | Fuzzy Matching nhận dạng cột tự động; xuất Excel đa sheet theo nhóm; xuất CSV chuẩn hóa UTF-8 BOM.
+Độ tin cậy & Kiểm thử | Chạy thử nghiệm một vài trường hợp mẫu. | Bộ 8 test Pytest tự động kiểm tra toàn diện API + Kiểm tra kiểu TypeScript tsc 0 lỗi.
