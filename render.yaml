@@ -1,0 +1,17 @@
+services:
+  - type: web
+    name: noviara-api
+    runtime: python
+    region: singapore
+    plan: free
+    buildCommand: pip install -r requirements.txt
+    startCommand: uvicorn backend.main:app --host 0.0.0.0 --port $PORT
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.11.0
+      - key: DB_ENGINE
+        value: postgres
+      # Thêm các biến còn lại qua Render Dashboard:
+      # DB_HOST, DB_PORT, DB_USER, DB_PASSWORD, DB_NAME
+      # DATABASE_URL, DIRECT_URL
+      # GEMINI_API_KEY, GEMINI_MODEL
