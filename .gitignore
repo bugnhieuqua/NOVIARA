@@ -16,3 +16,4 @@ backend/data/*.db
 scratch/
 .test/
 .agents/
+manage_accounts.py
