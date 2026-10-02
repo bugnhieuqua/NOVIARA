@@ -1,21 +1,80 @@
-node_modules/
-build/
-dist/
-coverage/
-.DS_Store
-*.log
-.env*
+# ==========================================
+# NOVIARA — .gitignore chuẩn
+# ==========================================
+
+# === MÔI TRƯỜNG & BÍ MẬT ===
+.env
+.env.local
+.env.*.local
+# Giữ lại file mẫu để người dùng biết cần khai báo gì
 !.env.example
+
+# === PYTHON ===
 venv/
 .venv/
 __pycache__/
-*.pyc
+*.py[cod]
+*.pyo
+*.pyd
+.Python
+*.egg-info/
+dist/
+build/
+*.egg
+.eggs/
+
+# === PYTEST & TEST CACHE ===
 .pytest_cache/
+.coverage
+htmlcov/
+*.xml
+
+# === NODE / FRONTEND ===
+node_modules/
+# dist/ được build bởi Vite — Vercel tự build lại, không cần commit
+dist/
+coverage/
+.cache/
+
+# === LOCK FILES (chỉ giữ package-lock.json) ===
+bun.lock
+
+# === DATABASE & DATA FILES ===
 *.db
-backend/data/*.db
+*.sqlite
+*.sqlite3
+backend/data/
 scratch/
-.test/
-.agents/
-manage_accounts.py
+
+# === HỆ ĐIỀU HÀNH ===
+.DS_Store
+.DS_Store?
+Thumbs.db
+desktop.ini
+
+# === EDITOR & IDE ===
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# === LOG FILES ===
+*.log
+logs/
+
+# === RENDER / CLOUD BUILD ===
+.render/
+
+# === TÀI LIỆU NỘI BỘ (Không cần trên GitHub) ===
 File/
-prisma/
+assets/
+test_actor.png
+
+# === AGENT / AI STUDIO CONFIG (chỉ local) ===
+.agents/
+metadata.json
+
+# === PRISMA (schema SQL đã chạy xong, không cần thiết trên Render) ===
+# BỎ COMMENT dòng dưới nếu muốn bỏ prisma khỏi git
+# prisma/

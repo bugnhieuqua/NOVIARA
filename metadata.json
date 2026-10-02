@@ -1,8 +1,0 @@
-{
-  "name": "NOVIARA - Genetic Algorithm Student Team Formation",
-  "description": "Academic Admin & Student Portal for intelligent student team formation using Genetic Algorithms, multi-dimensional skills, DISC profiles, and rule-based explanations.",
-  "requestFramePermissions": [],
-  "majorCapabilities": [
-    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
-  ]
-}

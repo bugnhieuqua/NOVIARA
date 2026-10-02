@@ -1,0 +1,318 @@
+// =============================================================================
+// NOVIARA - PRISMA SCHEMA FOR POSTGRESQL & SUPABASE
+// =============================================================================
+// Schema này định nghĩa toàn bộ 13 bảng thực thể và quan hệ chuẩn quốc tế cho NOVIARA.
+// Sẵn sàng 100% để deploy trực tiếp lên Supabase thông qua lệnh:
+//   npx prisma db push
+// =============================================================================
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+// -----------------------------------------------------------------------------
+// 1. BẢNG KHOA / ĐƠN VỊ ĐÀO TẠO (DEPARTMENTS)
+// -----------------------------------------------------------------------------
+model Department {
+  id          String   @id @db.VarChar(50)
+  code        String?  @db.VarChar(50)
+  name        String   @unique @db.VarChar(150)
+  description String?  @db.Text
+  createdAt   DateTime @default(now()) @map("created_at") @db.Timestamptz
+
+  @@map("departments")
+}
+
+// -----------------------------------------------------------------------------
+// 2. BẢNG TÀI KHOẢN QUẢN TRỊ & GIẢNG VIÊN (ACCOUNTS)
+// -----------------------------------------------------------------------------
+model Account {
+  id                 String             @id @db.VarChar(50)
+  username           String             @unique @db.VarChar(50)
+  passwordHash       String             @map("password_hash") @db.VarChar(255)
+  name               String             @db.VarChar(100)
+  email              String             @unique @db.VarChar(100)
+  phone              String?            @db.VarChar(20)
+  department         String?            @db.VarChar(150)
+  role               String             @db.VarChar(20) // 'admin' | 'lecturer'
+  isDefaultPassword  Boolean            @default(true) @map("is_default_password")
+  mustChangePassword Boolean            @default(true) @map("must_change_password")
+  createdAt          DateTime           @default(now()) @map("created_at") @db.Timestamptz
+  lastLogin          DateTime?          @map("last_login") @db.Timestamptz
+  groupingSessions   GroupingSession[]
+
+  @@map("accounts")
+}
+
+// -----------------------------------------------------------------------------
+// 3. BẢNG LỚP HỌC PHẦN (CLASSES)
+// -----------------------------------------------------------------------------
+model Class {
+  id                String              @id @db.VarChar(50)
+  code              String              @db.VarChar(50)
+  name              String              @db.VarChar(150)
+  semester          String?             @default("Đại học") @db.VarChar(50)
+  department        String?             @db.VarChar(150)
+  description       String?             @db.Text
+  lecturerId        String?             @default("GV-DEFAULT") @map("lecturer_id") @db.VarChar(50)
+  isSurveyActive    Boolean             @default(false) @map("is_survey_active")
+  surveyTitle       String?             @map("survey_title") @db.VarChar(200)
+  createdAt         DateTime            @default(now()) @map("created_at") @db.Timestamptz
+  classStudents     ClassStudent[]
+  surveySubmissions SurveySubmission[]
+  groupingSessions  GroupingSession[]
+
+  @@map("classes")
+}
+
+// -----------------------------------------------------------------------------
+// 4. BẢNG HỒ SƠ SINH VIÊN (STUDENTS)
+// -----------------------------------------------------------------------------
+model Student {
+  studentId          String              @id @map("student_id") @db.VarChar(50)
+  name               String              @db.VarChar(100)
+  email              String?             @db.VarChar(100)
+  phone              String?             @db.VarChar(20)
+  gender             String?             @db.VarChar(10) // 'Nam' | 'Nữ'
+  gpa                Float?              @default(3.0) @db.DoublePrecision
+  primarySkill       String?             @default("backend") @map("primary_skill") @db.VarChar(50)
+  secondarySkill     String?             @default("frontend") @map("secondary_skill") @db.VarChar(50)
+  discDominant       String?             @default("S") @map("disc_dominant") @db.VarChar(10)
+  isLeaderCandidate  Boolean?            @default(false) @map("is_leader_candidate")
+  profileJson        String?             @map("profile_json") @db.Text
+  avatar             String?             @db.VarChar(255)
+  createdAt          DateTime            @default(now()) @map("created_at") @db.Timestamptz
+  classStudents      ClassStudent[]
+  surveySubmissions  SurveySubmission[]
+
+  @@map("students")
+}
+
+// -----------------------------------------------------------------------------
+// 5. BẢNG SINH VIÊN THUỘC LỚP & ĐIỂM KỸ THUẬT (CLASS_STUDENTS)
+// -----------------------------------------------------------------------------
+model ClassStudent {
+  id                 Int      @id @default(autoincrement())
+  classId            String   @map("class_id") @db.VarChar(50)
+  studentId          String   @map("student_id") @db.VarChar(50)
+  gpa                Float?   @default(3.0) @db.DoublePrecision
+  skillFrontend      Float?   @default(3.0) @map("skill_frontend") @db.DoublePrecision
+  skillBackend       Float?   @default(3.0) @map("skill_backend") @db.DoublePrecision
+  skillDatabase      Float?   @default(3.0) @map("skill_database") @db.DoublePrecision
+  skillUiux          Float?   @default(3.0) @map("skill_uiux") @db.DoublePrecision
+  skillMobile        Float?   @default(3.0) @map("skill_mobile") @db.DoublePrecision
+  skillDevops        Float?   @default(3.0) @map("skill_devops") @db.DoublePrecision
+  skillAiml          Float?   @default(3.0) @map("skill_aiml") @db.DoublePrecision
+  skillQa            Float?   @default(3.0) @map("skill_qa") @db.DoublePrecision
+  skillPresentation  Float?   @default(3.0) @map("skill_presentation") @db.DoublePrecision
+  skillManagement    Float?   @default(3.0) @map("skill_management") @db.DoublePrecision
+  source             String?  @default("import_excel") @db.VarChar(20)
+  createdAt          DateTime @default(now()) @map("created_at") @db.Timestamptz
+
+  class   Class   @relation(fields: [classId], references: [id], onDelete: Cascade)
+  student Student @relation(fields: [studentId], references: [studentId], onDelete: Cascade, onUpdate: Cascade)
+
+  @@unique([classId, studentId])
+  @@index([classId], map: "idx_class_students_class")
+  @@map("class_students")
+}
+
+// -----------------------------------------------------------------------------
+// 6. BẢNG KẾT QUẢ KHẢO SÁT DISC & NĂNG LỰC (SURVEY_SUBMISSIONS)
+// -----------------------------------------------------------------------------
+model SurveySubmission {
+  id                     String   @id @db.VarChar(50)
+  classId                String   @map("class_id") @db.VarChar(50)
+  studentId              String   @map("student_id") @db.VarChar(50)
+  studentName            String   @map("student_name") @db.VarChar(100)
+  email                  String?  @db.VarChar(100)
+  phone                  String?  @db.VarChar(20)
+  gender                 String?  @default("Nam") @db.VarChar(10)
+  gpa                    Float?   @default(3.0) @db.DoublePrecision
+  primarySkill           String   @map("primary_skill") @db.VarChar(50)
+  secondarySkill         String   @map("secondary_skill") @db.VarChar(50)
+  isLeaderCandidate      Boolean  @default(false) @map("is_leader_candidate")
+  discD                  Float    @map("disc_d") @db.DoublePrecision
+  discI                  Float    @map("disc_i") @db.DoublePrecision
+  discS                  Float    @map("disc_s") @db.DoublePrecision
+  discC                  Float    @map("disc_c") @db.DoublePrecision
+  discDominant           String   @map("disc_dominant") @db.VarChar(10)
+  discSecondary          String?  @map("disc_secondary") @db.VarChar(10)
+  answersJson            String?  @map("answers_json") @db.Text
+  preferredTeammatesJson String?  @map("preferred_teammates_json") @db.Text
+  avoidTeammatesJson     String?  @map("avoid_teammates_json") @db.Text
+  submittedAt            DateTime @default(now()) @map("submitted_at") @db.Timestamptz
+
+  class   Class   @relation(fields: [classId], references: [id], onDelete: Cascade)
+  student Student @relation(fields: [studentId], references: [studentId], onDelete: Cascade, onUpdate: Cascade)
+
+  @@unique([classId, studentId])
+  @@index([classId], map: "idx_submissions_class")
+  @@index([studentId], map: "idx_submissions_student")
+  @@map("survey_submissions")
+}
+
+// -----------------------------------------------------------------------------
+// 7. BẢNG PHIÊN PHÂN NHÓM (GROUPING_SESSIONS)
+// -----------------------------------------------------------------------------
+model GroupingSession {
+  id                     String          @id @db.VarChar(50)
+  classId                String?         @map("class_id") @db.VarChar(50)
+  className              String?         @map("class_name") @db.VarChar(150)
+  lecturerId             String?         @map("lecturer_id") @db.VarChar(50)
+  title                  String          @db.VarChar(200)
+  status                 String          @default("draft") @db.VarChar(20) // 'draft' | 'running' | 'completed' | 'published'
+  totalStudents          Int             @map("total_students")
+  overallFitness         Float?          @default(0.0) @map("overall_fitness") @db.DoublePrecision
+  executionTimeMs        Int?            @default(0) @map("execution_time_ms")
+  convergenceHistoryJson String?         @map("convergence_history_json") @db.Text
+  googleSheetsUrl        String?         @map("google_sheets_url") @db.VarChar(255)
+  createdAt              DateTime        @default(now()) @map("created_at") @db.Timestamptz
+  updatedAt              DateTime?       @updatedAt @map("updated_at") @db.Timestamptz
+
+  class         Class?         @relation(fields: [classId], references: [id], onDelete: SetNull)
+  lecturer      Account?       @relation(fields: [lecturerId], references: [id], onDelete: SetNull)
+  sessionConfig SessionConfig?
+  groups        Group[]
+
+  @@index([classId], map: "idx_sessions_class")
+  @@map("grouping_sessions")
+}
+
+// -----------------------------------------------------------------------------
+// 8. BẢNG CẤU HÌNH THAM SỐ PHÂN NHÓM (SESSION_CONFIGS)
+// -----------------------------------------------------------------------------
+model SessionConfig {
+  sessionId                    String   @id @map("session_id") @db.VarChar(50)
+  targetGroupCount             Int      @map("target_group_count")
+  minMembers                   Int      @map("min_members")
+  maxMembers                   Int      @map("max_members")
+  weightSkillBalance           Float    @default(35.0) @map("weight_skill_balance") @db.DoublePrecision
+  weightDiscDiversity          Float    @default(25.0) @map("weight_disc_diversity") @db.DoublePrecision
+  weightGpaBalance             Float    @default(20.0) @map("weight_gpa_balance") @db.DoublePrecision
+  weightGenderBalance          Float    @default(10.0) @map("weight_gender_balance") @db.DoublePrecision
+  weightConstraintSatisfaction Float    @default(10.0) @map("weight_constraint_satisfaction") @db.DoublePrecision
+  requireLeader                Boolean  @default(false) @map("require_leader")
+  minFrontend                  Int      @default(1) @map("min_frontend")
+  minBackend                   Int      @default(1) @map("min_backend")
+  minDesign                    Int      @default(0) @map("min_design")
+  balanceGender                Boolean  @default(true) @map("balance_gender")
+  maxGpaSpread                 Float    @default(0.4) @map("max_gpa_spread") @db.DoublePrecision
+  respectPreferences           Boolean  @default(true) @map("respect_preferences")
+  forceNoClashes               Boolean  @default(true) @map("force_no_clashes")
+  gaPopulationSize             Int      @default(100) @map("ga_population_size")
+  gaGenerations                Int      @default(200) @map("ga_generations")
+  gaMutationRate               Float    @default(0.05) @map("ga_mutation_rate") @db.DoublePrecision
+  gaCrossoverRate              Float    @default(0.8) @map("ga_crossover_rate") @db.DoublePrecision
+  gaSelectionMethod            String   @default("tournament") @map("ga_selection_method") @db.VarChar(20)
+  gaElitismCount               Int      @default(2) @map("ga_elitism_count")
+  configJson                   String?  @map("config_json") @db.Text
+
+  session GroupingSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+
+  @@map("session_configs")
+}
+
+// -----------------------------------------------------------------------------
+// 9. BẢNG NHÓM SINH VIÊN THÀNH PHẨM (GROUPS)
+// -----------------------------------------------------------------------------
+model Group {
+  id                   String            @id @db.VarChar(50)
+  sessionId            String            @map("session_id") @db.VarChar(50)
+  groupNumber          Int               @map("group_number")
+  name                 String            @db.VarChar(150)
+  topic                String?           @db.VarChar(255)
+  leaderId             String?           @map("leader_id") @db.VarChar(50)
+  avgGpa               Float?            @default(0.0) @map("avg_gpa") @db.DoublePrecision
+  gpaVariance          Float?            @default(0.0) @map("gpa_variance") @db.DoublePrecision
+  skillBalanceScore    Float?            @default(0.0) @map("skill_balance_score") @db.DoublePrecision
+  discDiversityScore   Float?            @default(0.0) @map("disc_diversity_score") @db.DoublePrecision
+  compatibilityScore   Float?            @default(0.0) @map("compatibility_score") @db.DoublePrecision
+  genderRatioMale      Int?              @default(0) @map("gender_ratio_male")
+  genderRatioFemale    Int?              @default(0) @map("gender_ratio_female")
+  metricsJson          String?           @map("metrics_json") @db.Text
+  explanationJson      String?           @map("explanation_json") @db.Text
+  createdAt            DateTime          @default(now()) @map("created_at") @db.Timestamptz
+
+  session          GroupingSession   @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  groupMembers     GroupMember[]
+  groupExplanation GroupExplanation?
+
+  @@index([sessionId], map: "idx_groups_session")
+  @@map("groups")
+}
+
+// -----------------------------------------------------------------------------
+// 10. BẢNG THÀNH VIÊN TRONG NHÓM (GROUP_MEMBERS)
+// -----------------------------------------------------------------------------
+model GroupMember {
+  id                  Int      @id @default(autoincrement())
+  groupId             String   @map("group_id") @db.VarChar(50)
+  studentId           String   @map("student_id") @db.VarChar(50)
+  isLeader            Boolean  @default(false) @map("is_leader")
+  assignedRole        String?  @map("assigned_role") @db.VarChar(50)
+  studentSnapshotJson String?  @map("student_snapshot_json") @db.Text
+  joinedAt            DateTime @default(now()) @map("joined_at") @db.Timestamptz
+
+  group Group @relation(fields: [groupId], references: [id], onDelete: Cascade)
+
+  @@unique([groupId, studentId])
+  @@index([groupId], map: "idx_members_group")
+  @@map("group_members")
+}
+
+// -----------------------------------------------------------------------------
+// 11. BẢNG GIẢI THÍCH CHẤT LƯỢNG & AI LECTURER NOTES (GROUP_EXPLANATIONS)
+// -----------------------------------------------------------------------------
+model GroupExplanation {
+  id                    Int      @id @default(autoincrement())
+  groupId               String   @unique @map("group_id") @db.VarChar(50)
+  summary               String?  @db.Text
+  synergyHighlightsJson String?  @map("synergy_highlights_json") @db.Text
+  potentialRisksJson    String?  @map("potential_risks_json") @db.Text
+  recommendationsJson   String?  @map("recommendations_json") @db.Text
+  leadershipAnalysis    String?  @map("leadership_analysis") @db.Text
+  discSynergy           String?  @map("disc_synergy") @db.Text
+  skillCoverageSummary  String?  @map("skill_coverage_summary") @db.Text
+  aiPedagogicalAdvice   String?  @map("ai_pedagogical_advice") @db.Text
+  createdAt             DateTime @default(now()) @map("created_at") @db.Timestamptz
+
+  group Group @relation(fields: [groupId], references: [id], onDelete: Cascade)
+
+  @@map("group_explanations")
+}
+
+// -----------------------------------------------------------------------------
+// 12. BẢNG CẤU HÌNH TOÀN CỤC (SYSTEM_SETTINGS)
+// -----------------------------------------------------------------------------
+model SystemSetting {
+  key         String   @id @db.VarChar(50)
+  value       String   @db.Text
+  description String?  @db.VarChar(255)
+  updatedAt   DateTime @default(now()) @updatedAt @map("updated_at") @db.Timestamptz
+
+  @@map("system_settings")
+}
+
+// -----------------------------------------------------------------------------
+// 13. BẢNG TỆP DỮ LIỆU ĐÃ NẠP (UPLOADED_FILES)
+// -----------------------------------------------------------------------------
+model UploadedFile {
+  id           String   @id @db.VarChar(50)
+  filename     String   @db.VarChar(255)
+  fileSize     Int      @map("file_size")
+  fileType     String?  @map("file_type") @db.VarChar(50)
+  totalRecords Int?     @default(0) @map("total_records")
+  fileContent  Bytes?   @map("file_content")
+  classId      String?  @map("class_id") @db.VarChar(50)
+  uploadedBy   String?  @map("uploaded_by") @db.VarChar(50)
+  createdAt    DateTime @default(now()) @map("created_at") @db.Timestamptz
+
+  @@map("uploaded_files")
+}
