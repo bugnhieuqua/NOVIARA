@@ -40,7 +40,7 @@ def test_auth_login_flow():
     execute_commit("""
         INSERT INTO accounts 
         (id, username, password_hash, name, email, role, is_default_password, must_change_password)
-        VALUES ('TEST-ADMIN-01', ?, ?, 'Admin Kiểm Thử', ?, 'admin', 0, 0)
+        VALUES ('TEST-ADMIN-01', ?, ?, 'Admin Kiểm Thử', ?, 'admin', FALSE, FALSE)
     """, (test_user, test_hash, test_email))
 
     # 1. Đăng nhập sai mật khẩu -> 401

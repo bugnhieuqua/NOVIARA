@@ -162,5 +162,6 @@ print("\n>>> ALL TESTS PASSED SUCCESSFULLY! Chuẩn hóa CSDL và Công bố the
 client.delete("/api/sessions/GA-CNTT-SESSION-01")
 client.delete("/api/classes/CLASS-CNTT-01")
 from backend.database import execute_commit
-execute_commit("DELETE FROM students WHERE student_id LIKE 'SV24000%'")
-print(">>> Cleaned up test data from SQLite database! Zero demo data remaining.")
+execute_commit("DELETE FROM class_students WHERE student_id LIKE ?", ('SV24000%',))
+execute_commit("DELETE FROM students WHERE student_id LIKE ?", ('SV24000%',))
+print(">>> Cleaned up test data from database! Zero demo data remaining.")

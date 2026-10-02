@@ -15,7 +15,7 @@ logger = logging.getLogger(__name__)
 ROOT_DIR = Path(__file__).resolve().parent.parent
 DATA_DIR = ROOT_DIR / "backend" / "data"
 DATA_DIR.mkdir(parents=True, exist_ok=True)
-DB_PATH = DATA_DIR / "smartgroup.db"
+DB_PATH = DATA_DIR / "noviara"
 
 _pg_pool = None
 
@@ -101,7 +101,7 @@ class PGConnectionWrapper:
 
     def execute(self, query: str, params: Any = None):
         adapted_query = adapt_sql(query)
-        if params is None:
+        if params is None or (isinstance(params, (tuple, list)) and len(params) == 0):
             return self._conn.execute(adapted_query)
         if isinstance(params, list):
             params = tuple(params)

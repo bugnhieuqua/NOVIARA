@@ -24,7 +24,7 @@ def setup_test_class():
             ON CONFLICT (id) DO NOTHING
         """)
     yield
-    execute_commit("DELETE FROM class_students WHERE class_id = 'CLASS-TEST'")
+    execute_commit("DELETE FROM class_students WHERE class_id = 'CLASS-TEST' OR student_id LIKE ? OR student_id LIKE ?", ('SV2024%', 'SV00%'))
     execute_commit("DELETE FROM uploaded_files WHERE class_id = 'CLASS-TEST'")
     execute_commit("DELETE FROM students WHERE student_id LIKE ? OR student_id LIKE ?", ('SV2024%', 'SV00%'))
     execute_commit("DELETE FROM classes WHERE id = 'CLASS-TEST'")

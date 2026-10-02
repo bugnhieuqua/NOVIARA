@@ -116,7 +116,7 @@ async def submit_survey(payload: SubmitSurveyPayload):
             submitted_at = CURRENT_TIMESTAMP
     """, (
         sub_id, payload.classId, student_id, student_name, payload.email, payload.phone, payload.gender, payload.gpa,
-        payload.primarySkill, payload.secondarySkill, 1 if payload.isLeaderCandidate else 0,
+        payload.primarySkill, payload.secondarySkill, bool(payload.isLeaderCandidate),
         disc_scores.D, disc_scores.I, disc_scores.S, disc_scores.C,
         payload.disc.dominant, payload.disc.secondary,
         json.dumps(payload.answers),

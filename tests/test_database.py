@@ -23,8 +23,12 @@ def setup_db():
 
 
 def test_database_init_and_tables():
-    """Kiểm tra toàn bộ 11 bảng CSDL đã được tạo trong SQLite."""
-    tables = query_all("SELECT name FROM sqlite_master WHERE type='table' AND name NOT LIKE 'sqlite_%'")
+    """Kiểm tra toàn bộ 11 bảng CSDL đã được tạo trong CSDL."""
+    from backend.config import DB_ENGINE
+    if DB_ENGINE == "postgres":
+        tables = query_all("SELECT table_name as name FROM information_schema.tables WHERE table_schema = 'public'")
+    else:
+        tables = query_all("SELECT name FROM sqlite_master WHERE type='table' AND name NOT LIKE 'sqlite_%'")
     table_names = {t["name"] for t in tables}
     
     expected_tables = {
@@ -193,12 +197,13 @@ def test_uploaded_files_and_students_persistence():
     assert s1["name"] == "Nguyễn Văn Test"
     assert s1["gpa"] == 3.75
     assert s1["disc_dominant"] == "D"
-    assert s1["is_leader_candidate"] == 1
+    assert bool(s1["is_leader_candidate"]) is True
 
     # Dọn dẹp
     from backend.database import execute_commit
-    execute_commit("DELETE FROM uploaded_files WHERE filename = 'test_students.csv'")
+    execute_commit("DELETE FROM class_students WHERE student_id IN ('SV2026TEST01', 'SV2026TEST02')")
     execute_commit("DELETE FROM students WHERE student_id IN ('SV2026TEST01', 'SV2026TEST02')")
+    execute_commit("DELETE FROM uploaded_files WHERE filename = 'test_students.csv'")
 
 
 def test_grouping_sessions_persistence_publish_and_revoke():
@@ -313,6 +318,7 @@ def test_grouping_sessions_persistence_publish_and_revoke():
     # 5. Dọn dẹp phiên test
     client.delete("/api/sessions/GA-TEST-PERSISTENCE")
     from backend.database import execute_commit
+    execute_commit("DELETE FROM class_students WHERE student_id IN ('SV_PERSIST_01', 'SV_PERSIST_02')")
     execute_commit("DELETE FROM students WHERE student_id IN ('SV_PERSIST_01', 'SV_PERSIST_02')")
 
 
