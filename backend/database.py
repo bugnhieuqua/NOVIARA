@@ -8,6 +8,7 @@ from contextlib import contextmanager
 from typing import Generator, Any, List, Dict, Optional
 
 from backend.config import DB_ENGINE, DB_HOST, DB_PORT, DB_USER, DB_PASSWORD, DB_NAME
+import os
 
 logger = logging.getLogger(__name__)
 
@@ -29,15 +30,25 @@ def get_pg_pool():
             from psycopg.rows import dict_row
             from psycopg_pool import ConnectionPool
 
-            conn_info = f"host={DB_HOST} port={DB_PORT} user={DB_USER} password={DB_PASSWORD} dbname={DB_NAME}"
+            # Ưu tiên dùng DATABASE_URL (Supabase pooler - IPv4 compatible)
+            # Nếu không có thì build từ các biến DB_* riêng lẻ
+            database_url = os.environ.get("DATABASE_URL", "").strip()
+            if database_url:
+                conn_info = database_url
+                logger.info("Using DATABASE_URL for PostgreSQL connection.")
+            else:
+                conn_info = f"host={DB_HOST} port={DB_PORT} user={DB_USER} password={DB_PASSWORD} dbname={DB_NAME}"
+                logger.info(f"Using individual DB_* vars for PostgreSQL on {DB_HOST}.")
+
             _pg_pool = ConnectionPool(
                 conninfo=conn_info,
-                min_size=2,
-                max_size=20,
+                min_size=0,          # Không mở kết nối ngay khi khởi tạo
+                max_size=10,
+                open=True,
                 timeout=30.0,
                 kwargs={"row_factory": dict_row}
             )
-            logger.info(f"PostgreSQL connection pool initialized on {DB_NAME}.")
+            logger.info(f"PostgreSQL connection pool initialized successfully.")
         except Exception as e:
             logger.error(f"Lỗi khởi tạo PostgreSQL connection pool: {e}")
             raise
