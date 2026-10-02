@@ -1,3 +1,4 @@
+numpy
 sse-starlette
 fastapi
 uvicorn[standard]
