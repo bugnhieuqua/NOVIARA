@@ -4,23 +4,13 @@ services:
     runtime: python
     region: singapore
     plan: free
+    pythonVersion: "3.11.9"
     buildCommand: pip install -r requirements.txt
     startCommand: uvicorn backend.main:app --host 0.0.0.0 --port $PORT
     envVars:
-      - key: PYTHON_VERSION
-        value: 3.11.0
       - key: DB_ENGINE
         value: postgres
-      # Bạn có thể thêm các biến môi trường bảo mật ở đây hoặc trên Dashboard
-      # - key: DB_HOST
-      #   sync: false
-      # - key: DB_PASSWORD
-      #   sync: false
-      # - key: DATABASE_URL
-      #   sync: false
-      # - key: DIRECT_URL
-      #   sync: false
-      # - key: GEMINI_API_KEY
-      #   sync: false
-      # - key: GEMINI_MODEL
-      #   value: gemini-2.5-flash
+      # Thêm các biến bảo mật qua Render Dashboard:
+      # DB_HOST, DB_PORT, DB_USER, DB_PASSWORD, DB_NAME
+      # DATABASE_URL, DIRECT_URL
+      # GEMINI_API_KEY, GEMINI_MODEL
