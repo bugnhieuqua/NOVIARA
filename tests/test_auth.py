@@ -95,6 +95,13 @@ def test_admin_create_lecturer_with_hashed_password():
         "mustChangePassword": True
     }
 
+    # Đảm bảo Khoa Công Nghệ Thông Tin tồn tại theo nguyên tắc 'Có khoa mới có giảng viên'
+    execute_commit("""
+        INSERT INTO departments (id, code, name, description)
+        VALUES ('DEPT-CNTT-TEST', 'CNTT', 'Khoa Công Nghệ Thông Tin', 'Khoa CNTT')
+        ON CONFLICT (name) DO NOTHING
+    """)
+
     # Xóa trước nếu tồn tại
     execute_commit("DELETE FROM accounts WHERE username = ?", (lec_payload["username"],))
 
@@ -106,7 +113,7 @@ def test_admin_create_lecturer_with_hashed_password():
     assert created["account"]["username"] == lec_payload["username"]
     lec_id = created["account"]["id"]
 
-    # Kiểm tra trong CSDL SQLite: Mật khẩu PHẢI là chuỗi băm PBKDF2, không được lưu plaintext
+    # Kiểm tra trong CSDL PostgreSQL: Mật khẩu PHẢI là chuỗi băm PBKDF2, không được lưu plaintext
     db_acc = query_one("SELECT password_hash, must_change_password FROM accounts WHERE id = ?", (lec_id,))
     assert db_acc is not None
     assert db_acc["password_hash"].startswith("pbkdf2:sha256:100000$")
@@ -124,6 +131,7 @@ def test_admin_create_lecturer_with_hashed_password():
 
     # Dọn dẹp
     client.delete(f"/api/auth/lecturers/{lec_id}")
+    execute_commit("DELETE FROM departments WHERE id = 'DEPT-CNTT-TEST'")
 
 
 if __name__ == '__main__':

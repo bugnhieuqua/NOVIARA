@@ -67,7 +67,7 @@ app.include_router(api_router)
 
 @app.on_event("startup")
 async def on_startup():
-    """Khởi tạo cấu trúc các bảng CSDL SQLite khi server khởi động."""
+    """Khởi tạo cấu trúc các bảng CSDL PostgreSQL khi server khởi động."""
     init_db(seed=False)
 
 
@@ -124,47 +124,22 @@ class FacultyPayload(BaseModel):
 @app.get("/api/departments")
 async def get_departments():
     """
-    Truy vấn trực tiếp từ bảng departments trong SQLite.
-    Đồng thời tự động bổ sung các khoa tồn tại trong classes hoặc accounts nếu chưa có trong departments.
+    Truy vấn trực tiếp từ bảng departments trong CSDL.
+    Nghiêm cấm mọi hành vi tự ý thêm khoa, tự ý thêm giảng viên từ bất kỳ nguồn nào.
     """
-    from backend.database import query_all, execute_commit
-    import time
+    from backend.database import query_all
 
     rows = query_all("SELECT id, code, name, description, created_at FROM departments ORDER BY name ASC")
-    existing_names = {r["name"].strip().lower() for r in rows if r.get("name")}
-
-    # Kiểm tra thêm từ classes và accounts nếu có khoa cũ chưa ghi vào departments
-    legacy_rows = query_all("""
-        SELECT DISTINCT department as name FROM classes WHERE department IS NOT NULL AND TRIM(department) != ''
-        UNION
-        SELECT DISTINCT department as name FROM accounts WHERE department IS NOT NULL AND TRIM(department) != ''
-    """)
-
-    for leg in legacy_rows:
-        dept_name = (leg.get("name") or "").strip()
-        if dept_name and dept_name.lower() not in existing_names:
-            dept_id = f"DEPT-{int(time.time())}-{abs(hash(dept_name)) % 1000}"
-            # Sinh mã khoa tự động từ chữ cái đầu
-            code = "".join([w[0].upper() for w in dept_name.split() if w])[:6] or f"D{int(time.time()) % 1000}"
-            execute_commit("""
-                INSERT OR IGNORE INTO departments (id, code, name, description)
-                VALUES (?, ?, ?, ?)
-            """, (dept_id, code, dept_name, f"Khoa {dept_name}"))
-            rows.append({
-                "id": dept_id,
-                "code": code,
-                "name": dept_name,
-                "description": f"Khoa {dept_name}",
-                "created_at": time.strftime("%Y-%m-%d %H:%M:%S")
-            })
-            existing_names.add(dept_name.lower())
+    for r in rows:
+        if r.get("created_at") is not None:
+            r["created_at"] = str(r["created_at"])[:19]
 
     return {"departments": rows}
 
 
 @app.post("/api/departments")
 async def create_department(payload: FacultyPayload):
-    """Tạo hoặc cập nhật Khoa / Đơn vị mới trực tiếp vào bảng departments trong SQLite."""
+    """Tạo hoặc cập nhật Khoa / Đơn vị mới trực tiếp vào bảng departments trong PostgreSQL."""
     from backend.database import execute_commit, query_one
     import time
 
@@ -193,7 +168,7 @@ async def create_department(payload: FacultyPayload):
 
 @app.put("/api/departments/{dept_id}")
 async def update_department(dept_id: str, payload: FacultyPayload):
-    """Cập nhật thông tin mã khoa, tên khoa, mô tả vào bảng departments trong SQLite."""
+    """Cập nhật thông tin mã khoa, tên khoa, mô tả vào bảng departments trong PostgreSQL."""
     from backend.database import execute_commit, query_one
 
     row = query_one("SELECT * FROM departments WHERE id = ?", (dept_id,))
@@ -232,17 +207,23 @@ async def update_department(dept_id: str, payload: FacultyPayload):
 
 @app.delete("/api/departments/{dept_id}")
 async def delete_department(dept_id: str):
-    """Xóa Khoa / Đơn vị khỏi bảng departments trong SQLite."""
+    """Xóa Khoa / Đơn vị khỏi bảng departments trong CSDL và gỡ bỏ liên kết."""
     from backend.database import execute_commit, query_one
 
-    row = query_one("SELECT id FROM departments WHERE id = ?", (dept_id,))
+    row = query_one("SELECT id, name FROM departments WHERE id = ?", (dept_id,))
     if not row:
-        row = query_one("SELECT id FROM departments WHERE code = ? OR LOWER(name) = LOWER(?)", (dept_id, dept_id))
+        row = query_one("SELECT id, name FROM departments WHERE code = ? OR LOWER(name) = LOWER(?)", (dept_id, dept_id))
     if not row:
         raise HTTPException(status_code=404, detail="Không tìm thấy Khoa / Đơn vị để xóa.")
 
-    execute_commit("DELETE FROM departments WHERE id = ?", (row["id"],))
-    return {"success": True}
+    real_id = row["id"]
+    dept_name = row["name"]
+
+    # Gỡ bỏ liên kết khoa ở accounts và classes để đồng bộ triệt để
+    execute_commit("UPDATE accounts SET department = '' WHERE LOWER(department) = LOWER(?)", (dept_name,))
+    execute_commit("UPDATE classes SET department = '' WHERE LOWER(department) = LOWER(?)", (dept_name,))
+    execute_commit("DELETE FROM departments WHERE id = ?", (real_id,))
+    return {"success": True, "deletedId": real_id}
 
 
 # Endpoint tương thích ngược cho client cũ

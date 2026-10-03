@@ -1,11 +1,11 @@
 import { LecturerAccount } from '../types';
 
-export const DEFAULT_LECTURER_PASSWORD = '';
+export const DEFAULT_LECTURER_PASSWORD = 'Noviara@123';
 export const INITIAL_LECTURER_ACCOUNTS: LecturerAccount[] = [];
 
 /**
  * Tự động tạo email giáo dục và username từ họ tên tiếng Việt
- * Ví dụ: "Nguyễn Thế Vinh" -> vinh.nt@nau.edu.vn, username: "vinh.nt"
+ 
  */
 export function generateEduEmailFromName(fullName: string, domain = 'nau.edu.vn'): { username: string; email: string } {
   const clean = fullName
@@ -29,7 +29,7 @@ export function generateEduEmailFromName(fullName: string, domain = 'nau.edu.vn'
   return { username, email: `${username}@${domain}` };
 }
 
-// Bộ nhớ đệm danh sách tài khoản giảng viên (Nạp 100% từ SQLite CSDL)
+// Bộ nhớ đệm danh sách tài khoản giảng viên (Nạp 100% từ PostgreSQL CSDL)
 let memoryLecturers: LecturerAccount[] = [];
 
 export function getStoredLecturers(): LecturerAccount[] {
@@ -53,8 +53,9 @@ export function addLecturerAccount(account: Omit<LecturerAccount, 'id' | 'create
     ...account,
     id: `GV-${String(nextIdNumber).padStart(2, '0')}`,
     createdAt: new Date().toISOString().replace('T', ' ').slice(0, 19),
-    isDefaultPassword: false,
-    mustChangePassword: false,
+    password: account.password || DEFAULT_LECTURER_PASSWORD,
+    isDefaultPassword: true,
+    mustChangePassword: true,
     role: account.role || 'lecturer',
   };
 
@@ -107,11 +108,11 @@ export function deleteMultipleLecturers(ids: string[]): boolean {
  * Đặt lại mật khẩu về mật khẩu mới hoặc mặc định
  */
 export function resetLecturerPassword(id: string, newPassword?: string): boolean {
-  // Đồng bộ với backend CSDL SQLite
+  // Đồng bộ với backend CSDL PostgreSQL
   fetch(`/api/auth/lecturers/${encodeURIComponent(id)}/reset-password`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ newPassword: newPassword || 'NOVIARA@2026' })
+    body: JSON.stringify({ newPassword: newPassword || DEFAULT_LECTURER_PASSWORD })
   }).then(() => syncLecturersWithBackend()).catch(e => console.warn('Reset lecturer backend sync error:', e));
 
   return updateLecturerAccount(id, {
@@ -122,7 +123,7 @@ export function resetLecturerPassword(id: string, newPassword?: string): boolean
 }
 
 /**
- * Đồng bộ danh sách giảng viên từ SQLite Backend (/api/auth/lecturers)
+ * Đồng bộ danh sách giảng viên từ PostgreSQL Backend (/api/auth/lecturers)
  */
 export async function syncLecturersWithBackend(): Promise<LecturerAccount[]> {
   try {
@@ -130,18 +131,33 @@ export async function syncLecturersWithBackend(): Promise<LecturerAccount[]> {
     if (res.ok) {
       const data = await res.json();
       if (Array.isArray(data)) {
-        saveStoredLecturers(data);
-        return data;
+        const sanitized: LecturerAccount[] = data.map((d: any, idx: number) => ({
+          id: d.id || `GV-${String(idx + 1).padStart(2, '0')}`,
+          name: d.name || '',
+          email: d.email || '',
+          username: d.username || (d.email ? d.email.split('@')[0] : `user_${idx + 1}`),
+          department: d.department || '',
+          phone: d.phone || '',
+          role: d.role || 'lecturer',
+          isDefaultPassword: Boolean(d.isDefaultPassword ?? d.is_default_password),
+          mustChangePassword: Boolean(d.mustChangePassword ?? d.must_change_password),
+          createdAt: d.createdAt
+            ? String(d.createdAt).slice(0, 10)
+            : (d.created_at ? String(d.created_at).slice(0, 10) : new Date().toISOString().slice(0, 10)),
+          lastLogin: d.lastLogin || d.last_login || undefined,
+        }));
+        saveStoredLecturers(sanitized);
+        return sanitized;
       }
     }
   } catch (err) {
-    console.warn('Cannot sync lecturers from SQLite backend:', err);
+    console.warn('Cannot sync lecturers from PostgreSQL backend:', err);
   }
   return memoryLecturers;
 }
 
 /**
- * Admin tạo tài khoản giảng viên trên Backend CSDL SQLite
+ * Admin tạo tài khoản giảng viên trên Backend CSDL PostgreSQL
  */
 export async function createLecturerInBackend(payload: {
   name: string;

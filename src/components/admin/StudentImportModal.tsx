@@ -64,7 +64,7 @@ export const StudentImportModal: React.FC<StudentImportModalProps> = ({
   const [gsheetUrl, setGsheetUrl] = useState('');
   const [isFetchingGsheet, setIsFetchingGsheet] = useState(false);
 
-  // Đồng bộ danh sách lớp học từ SQLite
+  // Đồng bộ danh sách lớp học từ PostgreSQL
   useEffect(() => {
     if (!isOpen) return;
     const stored = getStoredClasses();

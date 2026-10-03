@@ -11,6 +11,10 @@ from backend.schemas import (
 )
 from backend.services.ga_service import calculate_group_metrics, generate_rule_explanation
 from backend.schemas import GroupingConfigSchema
+from backend.prompts.ai_prompts import (
+    format_group_explanation_prompt,
+    format_lecturer_extraction_prompt
+)
 
 # Khởi tạo Gemini Client nếu có API key
 gemini_client = None
@@ -34,44 +38,12 @@ async def explain_group_ai(req: ExplainGroupRequest) -> GroupExplanationSchema:
 
     # 2. Gọi Gemini LLM để làm giàu nội dung phân tích (Hybrid / Gemini Mode)
     try:
-        prompt = f"""
-Bạn là chuyên gia tư vấn sư phạm và quản trị nhóm dự án AI (NOVIARA).
-Hãy phân tích nhóm sinh viên sau đây và trả về định dạng JSON chính xác:
-
-Tên nhóm: {req.groupName}
-Đề tài: {req.topic or 'Dự án Công nghệ Thông tin'}
-Số lượng thành viên: {len(req.members)}
-
-Danh sách thành viên:
-{json.dumps([
-    {
-        "mssv": m.id,
-        "ten": m.name,
-        "gpa": m.gpa,
-        "chuyen_mon_chinh": m.primarySkill,
-        "disc_dominant": m.disc.dominant,
-        "disc_scores": m.disc.scores.model_dump(),
-        "la_leader": m.isLeaderCandidate
-    } for m in req.members
-], ensure_ascii=False, indent=2)}
-
-Chỉ số nhóm tính toán sơ bộ:
-- Điểm tương thích: {metrics.compatibilityScore}%
-- Điểm cân bằng kỹ năng: {metrics.skillBalanceScore}/100
-- Điểm đa dạng DISC: {metrics.discDiversityScore}/100
-- Tỷ lệ giới tính: Nam {metrics.genderRatio.get('male', 0)} / Nữ {metrics.genderRatio.get('female', 0)}
-
-Yêu cầu trả về đúng JSON Schema sau (KHÔNG thêm markdown ```json):
-{{
-  "summary": "Tóm tắt ngắn gọn 2-3 câu về bức tranh tổng thể và tiềm năng của nhóm",
-  "synergyHighlights": ["Điểm mạnh 1", "Điểm mạnh 2", "Điểm mạnh 3"],
-  "potentialRisks": ["Rủi ro 1 về kỹ năng/tính cách/quản trị", "Rủi ro 2"],
-  "recommendations": ["Khuyến nghị phân chia công việc cụ thể 1", "Khuyến nghị 2", "Khuyến nghị 3"],
-  "leadershipAnalysis": "Phân tích và đề xuất ai nên làm trưởng nhóm kèm lý do",
-  "discSynergy": "Nhận xét sâu về sự hòa hợp hoặc điểm cần lưu ý giữa các nét tính cách D, I, S, C",
-  "skillCoverageSummary": "Tóm tắt độ phủ các mảng kỹ năng chính (Frontend, Backend, DB, QA...)"
-}}
-"""
+        prompt = format_group_explanation_prompt(
+            group_name=req.groupName,
+            topic=req.topic,
+            members=req.members,
+            metrics=metrics
+        )
         response = gemini_client.models.generate_content(
             model=GEMINI_MODEL,
             contents=prompt,
@@ -145,20 +117,7 @@ async def process_lecturer_agent_ai(req: AIAgentLecturerRequest) -> Dict[str, An
     # Nếu truyền vào raw text và có Gemini
     if gemini_client and raw_content:
         try:
-            prompt = f"""
-Bạn là AI Agent xử lý dữ liệu nhân sự giảng viên đại học.
-Hãy trích xuất danh sách giảng viên từ văn bản thô sau:
-"{raw_content}"
-
-Trả về JSON array các object với các trường:
-- name: Họ và tên
-- department: Khoa / Bộ môn (Ví dụ: "Khoa Công Nghệ Thông Tin")
-- phone: Số điện thoại (nếu có, không thì rỗng)
-- personalEmail: Email (nếu có, không thì rỗng)
-- notes: Ghi chú chuyên môn
-
-Format JSON chỉ là mảng [{{...}}, {{...}}], không thêm giải thích hay markdown code block.
-"""
+            prompt = format_lecturer_extraction_prompt(raw_content, file_name=req.fileName or "")
             response = gemini_client.models.generate_content(
                 model=GEMINI_MODEL,
                 contents=prompt,
@@ -191,7 +150,7 @@ Format JSON chỉ là mảng [{{...}}, {{...}}], không thêm giải thích hay 
         extracted.append({
             "name": name,
             "department": dept,
-            "phone": "0901234567",
+        
             "personalEmail": "",
             "notes": "Nhập tự động qua AI Agent"
         })

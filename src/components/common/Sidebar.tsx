@@ -173,61 +173,17 @@ export const Sidebar: React.FC<SidebarProps> = ({
           )}
         </div>
 
-        {/* User Role & Profile Badge */}
-        {(userRole === 'admin' || userRole === 'lecturer') && (
-          <div className="p-3 border-b border-slate-200/80 bg-slate-50/40 shrink-0">
-            {isExpanded ? (
-              <div className="p-2.5 rounded-2xl bg-white flex items-center gap-2.5 border border-slate-200/80 shadow-xs">
-                {userRole === 'admin' ? (
-                  <div className="w-8 h-8 rounded-full bg-emerald-100 text-emerald-800 font-bold flex items-center justify-center text-xs flex-shrink-0 border border-emerald-200 shadow-2xs">
-                    <ShieldCheck className="w-4 h-4 text-emerald-700" />
-                  </div>
-                ) : (
-                  <div className="w-8 h-8 rounded-full bg-indigo-100 text-indigo-700 font-bold flex items-center justify-center text-xs flex-shrink-0 border border-indigo-200 shadow-2xs">
-                    {currentLecturer?.name ? currentLecturer.name.trim().slice(0, 1).toUpperCase() : 'GV'}
-                  </div>
-                )}
-                <div className="min-w-0 flex-1">
-                  <p className="text-xs font-bold text-zinc-950 truncate">
-                    {userRole === 'admin' ? 'Quản trị viên Cấp cao' : currentLecturer?.name || 'Giảng viên NOVIARA'}
-                  </p>
-                  <p className="text-[10px] text-zinc-500 font-mono font-medium truncate">
-                    {userRole === 'admin' ? 'admin@noviara.edu.vn' : currentLecturer?.email || 'gv@noviara.edu.vn'}
-                  </p>
-                </div>
-              </div>
-            ) : (
-              <div
-                className="flex justify-center"
-                title={userRole === 'admin' ? 'Quản trị viên Cấp cao' : currentLecturer?.name || 'Giảng viên NOVIARA'}
-              >
-                {userRole === 'admin' ? (
-                  <div className="w-10 h-10 rounded-xl bg-emerald-100 text-emerald-800 font-bold flex items-center justify-center shadow-xs border border-emerald-200">
-                    <ShieldCheck className="w-5 h-5 text-emerald-700" />
-                  </div>
-                ) : (
-                  <div className="w-10 h-10 rounded-xl bg-indigo-100 text-indigo-700 font-bold flex items-center justify-center text-xs shadow-xs border border-indigo-200">
-                    {currentLecturer?.name ? currentLecturer.name.trim().slice(0, 1).toUpperCase() : 'GV'}
-                  </div>
-                )}
-              </div>
-            )}
-          </div>
-        )}
-
-
-
         {/* Scrollable Navigation Items */}
         <div className="flex-1 overflow-y-auto p-2.5 space-y-1.5 custom-scrollbar">
 
           {/* === MENU DÀNH CHO QUẢN TRỊ VIÊN (ADMIN) === */}
           {userRole === 'admin' ? (
             <div className="space-y-1">
-              {/* Fix Bug 1: Only render section title when expanded to avoid vertical letter stacking */}
+              {/* Phân nhóm danh mục Quản trị */}
               {isExpanded && (
                 <div className="px-3 py-1.5 mb-1 animate-in fade-in duration-150">
                   <span className="text-[10px] font-bold uppercase tracking-wider text-zinc-400">
-                    Quản trị hệ thống
+                    QUẢN TRỊ ĐÀO TẠO & HỆ THỐNG
                   </span>
                 </div>
               )}
@@ -252,7 +208,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
                       currentView === 'admin-lecturers' ? 'text-white' : 'text-emerald-600'
                     }`}
                   />
-                  {isExpanded && <span className="truncate">Quản lý Giảng viên</span>}
+                  {isExpanded && <span className="truncate">Quản lý Giảng viên & Khoa</span>}
                 </div>
                 {isExpanded && (
                   <span
@@ -329,7 +285,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
             /* === MENU DÀNH CHO GIẢNG VIÊN (QUẢN LÝ LỚP & SINH VIÊN CỦA MÌNH) === */
             <>
               {/* Primary Call to Action Button */}
-              <div className="mb-2">
+              <div className="mb-2.5">
                 <button
                   id="sidebar-new-session-cta"
                   onClick={() => onViewChange('admin-new-session')}
@@ -349,8 +305,16 @@ export const Sidebar: React.FC<SidebarProps> = ({
                 </button>
               </div>
 
-              {/* Navigation Menu */}
+              {/* NHÓM 1: DASHBOARD & ĐÀO TẠO (Tham chiếu LMS Hình 2) */}
               <div className="space-y-1">
+                {isExpanded && (
+                  <div className="px-3 py-1 mb-1 animate-in fade-in duration-150">
+                    <span className="text-[10px] font-bold uppercase tracking-wider text-zinc-400">
+                      DASHBOARD & ĐÀO TẠO
+                    </span>
+                  </div>
+                )}
+
                 <button
                   onClick={() => onViewChange('admin-dashboard')}
                   className={`w-full flex items-center transition-all cursor-pointer ${
@@ -465,6 +429,17 @@ export const Sidebar: React.FC<SidebarProps> = ({
                     </div>
                   )}
                 </div>
+              </div>
+
+              {/* NHÓM 2: CÔNG CỤ PHÂN NHÓM AI (Tham chiếu LMS Hình 2) */}
+              <div className="space-y-1 pt-2">
+                {isExpanded && (
+                  <div className="px-3 py-1 mb-1 animate-in fade-in duration-150">
+                    <span className="text-[10px] font-bold uppercase tracking-wider text-zinc-400">
+                      CÔNG CỤ PHÂN NHÓM AI
+                    </span>
+                  </div>
+                )}
 
                 {/* Kết quả Phân nhóm */}
                 <button
@@ -503,11 +478,11 @@ export const Sidebar: React.FC<SidebarProps> = ({
                 </button>
               </div>
 
-              {/* Thao tác nhanh (Chỉ hiển thị khi expanded) */}
+              {/* NHÓM 3: TIỆN ÍCH & DỮ LIỆU (Tham chiếu LMS Hình 2) */}
               {isExpanded && (
-                <div className="pt-3.5 mt-3.5 border-t border-slate-200/80 space-y-1 animate-in fade-in duration-150">
+                <div className="pt-3 mt-3 border-t border-slate-200/80 space-y-1 animate-in fade-in duration-150">
                   <span className="text-[10px] font-bold uppercase tracking-wider text-zinc-400 px-3 block mb-1">
-                    Thao tác nhanh
+                    TIỆN ÍCH & DỮ LIỆU
                   </span>
 
                   {onOpenImportModal && (

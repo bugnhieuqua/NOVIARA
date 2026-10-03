@@ -468,7 +468,7 @@ export const GroupingWizard: React.FC<GroupingWizardProps> = ({
         onStudentsLoaded?.(dbStudents, cls);
         setFileFeedback({
           type: 'info',
-          message: `Đã nạp ${dbStudents.length} sinh viên của lớp ${cls.name} từ CSDL SQLite.`,
+          message: `Đã nạp ${dbStudents.length} sinh viên của lớp ${cls.name} từ CSDL PostgreSQL.`,
         });
         return;
       }
@@ -553,7 +553,7 @@ export const GroupingWizard: React.FC<GroupingWizardProps> = ({
         setFileFeedback({
           type: 'success',
           message: `Đã nạp thành công ${remoteStudents.length} sinh viên từ khảo sát DISC của lớp ${selectedClass.name}!`,
-          details: 'Dữ liệu được lấy trực tiếp từ CSDL SQLite Backend.',
+          details: 'Dữ liệu được lấy trực tiếp từ CSDL PostgreSQL Backend.',
         });
         return;
       }
@@ -614,7 +614,7 @@ export const GroupingWizard: React.FC<GroupingWizardProps> = ({
         setWizardStudents(parsed);
         onStudentsLoaded?.(parsed, selectedClass);
 
-        // Lưu tệp và danh sách sinh viên bền vững vào CSDL SQLite (bảng uploaded_files, students, class_students)
+        // Lưu tệp và danh sách sinh viên bền vững vào CSDL PostgreSQL (bảng uploaded_files, students, class_students)
         try {
           await uploadStudentsFileToBackend(file, selectedClass.id);
         } catch {
@@ -624,7 +624,7 @@ export const GroupingWizard: React.FC<GroupingWizardProps> = ({
         setFileFeedback({
           type: 'success',
           message: `Đã nạp thành công ${parsed.length} sinh viên từ tệp "${file.name}" cho lớp ${selectedClass.name}!`,
-          details: `Đã lưu toàn bộ sinh viên vào CSDL SQLite cho lớp [${selectedClass.code}].`,
+          details: `Đã lưu toàn bộ sinh viên vào CSDL PostgreSQL cho lớp [${selectedClass.code}].`,
         });
       } catch {
         setFileFeedback({ type: 'error', message: 'Lỗi khi đọc tệp Excel/CSV. Vui lòng kiểm tra định dạng tệp.' });
@@ -686,13 +686,13 @@ export const GroupingWizard: React.FC<GroupingWizardProps> = ({
       setWizardStudents(parsed);
       onStudentsLoaded?.(parsed, selectedClass);
 
-      // Lưu bền vững vào CSDL SQLite theo classId
+      // Lưu bền vững vào CSDL PostgreSQL theo classId
       await saveBulkStudentsToBackend(parsed, selectedClass.id);
 
       setFileFeedback({
         type: 'success',
         message: `Đã đồng bộ thành công ${parsed.length} sinh viên từ Google Sheets cho lớp ${selectedClass.name}!`,
-        details: `Đã lưu toàn bộ sinh viên vào CSDL SQLite cho lớp [${selectedClass.code}].`,
+        details: `Đã lưu toàn bộ sinh viên vào CSDL PostgreSQL cho lớp [${selectedClass.code}].`,
       });
       setGoogleSheetsUrlInput('');
     } catch {

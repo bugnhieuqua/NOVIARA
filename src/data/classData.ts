@@ -1,9 +1,9 @@
 import { ClassCohort, Student, SurveySubmission } from '../types';
 
-// Danh sách lớp học khởi tạo trong bộ nhớ (Nạp 100% từ SQLite CSDL)
+// Danh sách lớp học khởi tạo trong bộ nhớ (Nạp 100% từ PostgreSQL CSDL)
 let memoryClasses: ClassCohort[] = [];
 
-// Danh sách bài nộp khảo sát khởi tạo trong bộ nhớ (Nạp 100% từ SQLite CSDL)
+// Danh sách bài nộp khảo sát khởi tạo trong bộ nhớ (Nạp 100% từ PostgreSQL CSDL)
 let memorySubmissions: SurveySubmission[] = [];
 
 export const INITIAL_CLASSES: ClassCohort[] = [];
@@ -52,7 +52,7 @@ export function saveStoredSubmissions(submissions: SurveySubmission[]): void {
 }
 
 /**
- * Thêm lớp học mới (Tạo lớp) & Đồng bộ trực tiếp vào CSDL SQLite Backend
+ * Thêm lớp học mới (Tạo lớp) & Đồng bộ trực tiếp vào CSDL PostgreSQL Backend
  */
 export function addClass(cls: Omit<ClassCohort, 'id' | 'createdAt' | 'studentCount' | 'surveyStudentCount'>): ClassCohort {
   const current = getStoredClasses();
@@ -70,7 +70,7 @@ export function addClass(cls: Omit<ClassCohort, 'id' | 'createdAt' | 'studentCou
   const updated = [newClass, ...current];
   saveStoredClasses(updated);
 
-  // Ghi trực tiếp vào CSDL SQLite Backend
+  // Ghi trực tiếp vào CSDL PostgreSQL Backend
   fetch('/api/classes', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
@@ -168,7 +168,7 @@ export function toggleSurveyStatus(classId: string): ClassCohort | null {
 
   saveStoredClasses(current);
 
-  // Đồng bộ trạng thái lên CSDL SQLite Backend
+  // Đồng bộ trạng thái lên CSDL PostgreSQL Backend
   fetch(`/api/classes/${classId}/survey-status`, {
     method: 'PATCH',
     headers: { 'Content-Type': 'application/json' },
@@ -205,13 +205,13 @@ export function addSurveySubmission(
     saveStoredClasses(currentClasses);
   }
 
-  // Tự động đồng bộ lên CSDL SQLite Backend
+  // Tự động đồng bộ lên CSDL PostgreSQL Backend
   fetch('/api/surveys/submit', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(newSub),
   }).catch(err => {
-    console.warn('[DB Sync] Lỗi khi gửi bài nộp vào CSDL SQLite:', err);
+    console.warn('[DB Sync] Lỗi khi gửi bài nộp vào CSDL PostgreSQL:', err);
   });
 
   return newSub;

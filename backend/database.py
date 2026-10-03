@@ -1,22 +1,22 @@
 # -*- coding: utf-8 -*-
-import sqlite3
+"""
+============================================================================
+NOVIARA BACKEND - POSTGRESQL DATABASE CLIENT
+============================================================================
+Hệ thống CSDL chuẩn sử dụng PostgreSQL qua thư viện psycopg 3 ConnectionPool.
+Toàn bộ truy vấn được quản lý thread-safe, tự động commit/rollback transaction.
+============================================================================
+"""
+
 import os
 import re
 import logging
-from pathlib import Path
 from contextlib import contextmanager
 from typing import Generator, Any, List, Dict, Optional
 
-from backend.config import DB_ENGINE, DB_HOST, DB_PORT, DB_USER, DB_PASSWORD, DB_NAME
-import os
+from backend.config import DB_HOST, DB_PORT, DB_USER, DB_PASSWORD, DB_NAME
 
 logger = logging.getLogger(__name__)
-
-# Thư mục gốc dự án
-ROOT_DIR = Path(__file__).resolve().parent.parent
-DATA_DIR = ROOT_DIR / "backend" / "data"
-DATA_DIR.mkdir(parents=True, exist_ok=True)
-DB_PATH = DATA_DIR / "noviara"
 
 _pg_pool = None
 
@@ -30,25 +30,25 @@ def get_pg_pool():
             from psycopg.rows import dict_row
             from psycopg_pool import ConnectionPool
 
-            # Ưu tiên dùng DATABASE_URL (Supabase pooler - IPv4 compatible)
-            # Nếu không có thì build từ các biến DB_* riêng lẻ
+            # Ưu tiên dùng DATABASE_URL (Supabase Pooler / Cloud Postgres)
+            # Nếu không có thì kết hợp từ các biến DB_* riêng lẻ
             database_url = os.environ.get("DATABASE_URL", "").strip()
             if database_url:
                 conn_info = database_url
                 logger.info("Using DATABASE_URL for PostgreSQL connection.")
             else:
                 conn_info = f"host={DB_HOST} port={DB_PORT} user={DB_USER} password={DB_PASSWORD} dbname={DB_NAME}"
-                logger.info(f"Using individual DB_* vars for PostgreSQL on {DB_HOST}.")
+                logger.info(f"Using individual DB_* variables for PostgreSQL on {DB_HOST}:{DB_PORT}.")
 
             _pg_pool = ConnectionPool(
                 conninfo=conn_info,
-                min_size=0,          # Không mở kết nối ngay khi khởi tạo
+                min_size=0,
                 max_size=10,
                 open=True,
                 timeout=30.0,
                 kwargs={"row_factory": dict_row}
             )
-            logger.info(f"PostgreSQL connection pool initialized successfully.")
+            logger.info("PostgreSQL connection pool initialized successfully.")
         except Exception as e:
             logger.error(f"Lỗi khởi tạo PostgreSQL connection pool: {e}")
             raise
@@ -58,7 +58,7 @@ def get_pg_pool():
 class SmartDict(dict):
     """
     Dictionary thông minh hỗ trợ truy cập khóa không phân biệt hoa thường
-    (đặc biệt hữu ích khi truy vấn giữa SQLite và PostgreSQL).
+    đảm bảo tương thích giữa các quy ước đặt tên cột của PostgreSQL và Frontend.
     """
     def __getitem__(self, key):
         if key in self:
@@ -87,25 +87,31 @@ class SmartDict(dict):
 
 def adapt_sql(query: str) -> str:
     """
-    Chuẩn hóa câu lệnh SQL từ cú pháp SQLite sang PostgreSQL:
+    Chuẩn hóa câu lệnh SQL cho PostgreSQL:
     1. Chuyển đổi placeholder '?' sang '%s'
-    2. Bọc ngoặc kép các alias camelCase sau 'AS' (ví dụ 'as isSurveyActive' -> 'AS "isSurveyActive"')
-       để PostgreSQL giữ nguyên casing cho JSON trả về Frontend React.
+    2. Chuyển đổi 'INSERT OR IGNORE INTO' sang 'INSERT INTO ... ON CONFLICT DO NOTHING'
+    3. Bọc ngoặc kép các alias camelCase sau 'AS' (ví dụ 'AS isSurveyActive' -> 'AS "isSurveyActive"')
+       để PostgreSQL bảo toàn định dạng thuộc tính trả về cho React Frontend.
     """
-    if DB_ENGINE == "postgres":
-        q = query.replace("?", "%s")
-        # Giữ nguyên camelCase cho các alias sau AS
-        q = re.sub(r'(?i)\bas\s+([a-zA-Z_][a-zA-Z0-9_]*[A-Z][a-zA-Z0-9_]*)', r'AS "\1"', q)
-        return q
-    return query
+    q = query
+    # Chuyển đổi INSERT OR IGNORE INTO an toàn cho PostgreSQL
+    if re.search(r'(?i)\binsert\s+or\s+ignore\s+into\b', q):
+        q = re.sub(r'(?i)\binsert\s+or\s+ignore\s+into\b', 'INSERT INTO', q)
+        if 'on conflict' not in q.lower():
+            q = q.rstrip(' ;\n\t') + ' ON CONFLICT DO NOTHING'
+
+    q = q.replace("?", "%s")
+    # Giữ nguyên camelCase cho các alias sau AS
+    q = re.sub(r'(?i)\bas\s+([a-zA-Z_][a-zA-Z0-9_]*[A-Z][a-zA-Z0-9_]*)', r'AS "\1"', q)
+    return q
 
 
 class PGConnectionWrapper:
     """
-    Wrapper bao quanh psycopg connection để tương thích hoàn toàn với SQLite API:
+    Wrapper bao quanh psycopg connection:
     - Tự động chuyển đổi placeholder '?' sang '%s'
     - Tự động bọc alias camelCase để bảo toàn tên trường
-    - Tự động ủy quyền commit, rollback, cursor và các phương thức khác
+    - Quản lý commit, rollback, cursor an toàn
     """
     def __init__(self, raw_conn):
         self._conn = raw_conn
@@ -137,35 +143,18 @@ class PGConnectionWrapper:
 @contextmanager
 def get_db_connection() -> Generator[Any, None, None]:
     """
-    Context manager cung cấp kết nối CSDL:
-    - Nếu DB_ENGINE == 'postgres': Lấy kết nối từ PostgreSQL Pool (bọc PGConnectionWrapper)
-    - Nếu DB_ENGINE == 'sqlite': Kết nối SQLite thread-safe
-    Tự động commit nếu thành công, rollback nếu có lỗi.
+    Context manager cung cấp kết nối CSDL PostgreSQL từ Connection Pool.
+    Tự động commit nếu thành công, rollback nếu có exception.
     """
-    if DB_ENGINE == "postgres":
-        pool = get_pg_pool()
-        with pool.connection() as raw_conn:
-            wrapped = PGConnectionWrapper(raw_conn)
-            try:
-                yield wrapped
-                wrapped.commit()
-            except Exception:
-                wrapped.rollback()
-                raise
-    else:
-        conn = sqlite3.connect(str(DB_PATH), timeout=30.0)
-        conn.row_factory = sqlite3.Row
-        conn.execute("PRAGMA foreign_keys = ON;")
-        conn.execute("PRAGMA journal_mode = WAL;")
-        conn.execute("PRAGMA busy_timeout = 15000;")
+    pool = get_pg_pool()
+    with pool.connection() as raw_conn:
+        wrapped = PGConnectionWrapper(raw_conn)
         try:
-            yield conn
-            conn.commit()
+            yield wrapped
+            wrapped.commit()
         except Exception:
-            conn.rollback()
+            wrapped.rollback()
             raise
-        finally:
-            conn.close()
 
 
 def query_all(query: str, params: tuple = ()) -> List[Dict[str, Any]]:

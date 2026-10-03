@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """
 NOVIARA - Sessions Router
-Quản lý lưu trữ bền vững các phiên phân nhóm đồ án bằng AI/GA vào SQLite.
+Quản lý lưu trữ bền vững các phiên phân nhóm đồ án bằng AI/GA vào PostgreSQL.
 Hỗ trợ Công bố (Publish) và Thu hồi (Revoke/Unpublish) cho sinh viên tra cứu.
 """
 import json
@@ -20,7 +20,7 @@ class UpdateSessionStatusPayload(BaseModel):
 
 
 def _format_session_from_db(sess_row: Dict[str, Any], conn) -> Dict[str, Any]:
-    """Helper tái cấu trúc đối tượng GroupingSession hoàn chỉnh từ SQLite."""
+    """Helper tái cấu trúc đối tượng GroupingSession hoàn chỉnh từ PostgreSQL."""
     session_id = sess_row["id"]
 
     # 1. Lấy config
@@ -255,7 +255,7 @@ async def get_published_session(class_id: Optional[str] = None):
 @router.post("", status_code=status.HTTP_201_CREATED)
 async def save_session(payload: Dict[str, Any]):
     """
-    Lưu phiên phân nhóm đồ án vào CSDL SQLite (bền vững, không bị mất khi F5).
+    Lưu phiên phân nhóm đồ án vào CSDL PostgreSQL (bền vững, không bị mất khi F5).
     Đồng thời lưu toàn bộ sinh viên trong phiên vào bảng students.
     """
     session_id = payload.get("id") or f"GA-{int(time.time())}"
@@ -279,7 +279,7 @@ async def save_session(payload: Dict[str, Any]):
             cls_exists = conn.execute("SELECT id FROM classes WHERE id = ?", (class_id,)).fetchone()
             if not cls_exists:
                 conn.execute(
-                    "INSERT OR IGNORE INTO classes (id, code, name) VALUES (?, ?, ?)",
+                    "INSERT INTO classes (id, code, name) VALUES (?, ?, ?)",
                     (class_id, class_id, class_name or class_id)
                 )
 
@@ -572,7 +572,7 @@ class UpdateSheetsUrlPayload(BaseModel):
 
 @router.patch("/{session_id}/sheets-url")
 async def update_sheets_url(session_id: str, payload: UpdateSheetsUrlPayload):
-    """Lưu liên kết Google Sheets đã xuất vào CSDL SQLite cho phiên phân nhóm."""
+    """Lưu liên kết Google Sheets đã xuất vào CSDL PostgreSQL cho phiên phân nhóm."""
     sess = query_one("SELECT id, title FROM grouping_sessions WHERE id = ?", (session_id,))
     if not sess:
         raise HTTPException(status_code=404, detail="Không tìm thấy phiên phân nhóm.")

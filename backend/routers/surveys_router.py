@@ -44,7 +44,7 @@ class SubmitSurveyPayload(BaseModel):
 @router.post("/submit", status_code=status.HTTP_201_CREATED)
 async def submit_survey(payload: SubmitSurveyPayload):
     """
-    Tiếp nhận bài khảo sát của sinh viên và lưu vào Cơ sở dữ liệu SQLite:
+    Tiếp nhận bài khảo sát của sinh viên và lưu vào Cơ sở dữ liệu PostgreSQL:
     1. Kiểm tra lớp học tồn tại và trạng thái khảo sát đang mở.
     2. Upsert hồ sơ sinh viên vào bảng students.
     3. Ghi danh vào bảng class_students.

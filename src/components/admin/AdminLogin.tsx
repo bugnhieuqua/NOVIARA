@@ -68,7 +68,7 @@ export const AdminLogin: React.FC<AdminLoginProps> = ({
     setIsLoading(true);
 
     try {
-      // 1. Xác thực bảo mật qua Backend CSDL SQLite
+      // 1. Xác thực bảo mật qua Backend CSDL PostgreSQL
       const res = await fetch('/api/auth/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },

@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { createPortal } from 'react-dom';
 import {
   Dna,
   Search,
@@ -319,100 +320,132 @@ export const UserHome: React.FC<UserHomeProps> = ({
       </header>
 
       {/* =========================================================
-          MOBILE MENU (Below lg breakpoint, animated dropdown)
+          MOBILE SLIDE-OVER DRAWER (Rendered via React Portal)
+          Giải quyết triệt để lỗi bị cắt nửa / loè trên thiết bị di động
           ========================================================= */}
-      <div
-        className={`lg:hidden fixed left-0 right-0 top-[72px] z-40 bg-gray-900/95 backdrop-blur-lg border-t border-b border-gray-800 shadow-2xl transition-all duration-500 ease-out ${isMobileMenuOpen
-          ? 'translate-y-0 opacity-100 pointer-events-auto'
-          : '-translate-y-4 opacity-0 pointer-events-none'
-          }`}
-      >
-        <div className="px-6 py-5 space-y-2">
-          <button
-            onClick={() => {
-              setIsMobileMenuOpen(false);
-              onNavigateToLookup();
-            }}
-            className="w-full text-left py-3 px-3 rounded-lg text-sm font-medium text-gray-200 hover:bg-gray-800/50 transition-colors flex items-center justify-between"
-          >
-            <span>Tra Cứu Nhóm Sinh Viên</span>
-            <ArrowRight className="w-4 h-4 text-gray-400" />
-          </button>
+      {isMobileMenuOpen && typeof document !== 'undefined' && createPortal(
+        <div className="fixed inset-0 z-[999999] lg:hidden">
+          {/* Backdrop Overlay (Chạm vào nền tối để đóng menu) */}
+          <div
+            className="fixed inset-0 bg-black/80 backdrop-blur-sm transition-opacity animate-in fade-in duration-200"
+            onClick={() => setIsMobileMenuOpen(false)}
+          />
 
-          <button
-            onClick={() => {
-              setIsMobileMenuOpen(false);
-              setCurrentSlideIndex(1);
-              setIsDetailModalOpen(true);
-            }}
-            className="w-full text-left py-3 px-3 rounded-lg text-sm font-medium text-gray-200 hover:bg-gray-800/50 transition-colors flex items-center justify-between"
-          >
-            <span>Giải Thuật Di Truyền (GA)</span>
-            <Dna className="w-4 h-4 text-emerald-400" />
-          </button>
+          {/* Slide-over Drawer Panel */}
+          <div className="fixed inset-y-0 right-0 w-[85%] max-w-sm bg-zinc-950/98 backdrop-blur-2xl border-l border-zinc-800 shadow-2xl flex flex-col justify-between p-6 animate-in slide-in-from-right duration-300">
 
-          <button
-            onClick={() => {
-              setIsMobileMenuOpen(false);
-              setCurrentSlideIndex(2);
-              setIsDetailModalOpen(true);
-            }}
-            className="w-full text-left py-3 px-3 rounded-lg text-sm font-medium text-gray-200 hover:bg-gray-800/50 transition-colors flex items-center justify-between"
-          >
-            <span>Ma Trận Tính Cách DISC</span>
-            <Brain className="w-4 h-4 text-sky-400" />
-          </button>
+            {/* Drawer Header */}
+            <div className="flex items-center justify-between pb-5 border-b border-zinc-800/80 shrink-0">
+              <div className="flex items-center gap-2.5">
+                <img src="/logo.png" alt="NOVIARA" className="w-8 h-8 object-contain" />
+                <div>
+                  <span className="font-display font-black text-white text-base block leading-none">NOVIARA</span>
+                  <span className="text-[9px] font-mono font-bold text-emerald-400 uppercase tracking-wider">Cổng Sinh Viên</span>
+                </div>
+              </div>
+              <button
+                onClick={() => setIsMobileMenuOpen(false)}
+                className="w-9 h-9 rounded-full bg-zinc-900 border border-zinc-700/80 text-zinc-300 flex items-center justify-center hover:bg-zinc-800 hover:text-white transition-colors cursor-pointer"
+                title="Đóng menu"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
 
-          <button
-            onClick={() => {
-              setIsMobileMenuOpen(false);
-              setIsDetailModalOpen(true);
-            }}
-            className="w-full text-left py-3 px-3 rounded-lg text-sm font-medium text-gray-200 hover:bg-gray-800/50 transition-colors flex items-center justify-between"
-          >
-            <span>Quy Trình Phân Nhóm 4 Bước</span>
-            <Layers className="w-4 h-4 text-purple-400" />
-          </button>
-
-          {/* Bottom Section in Mobile Menu */}
-          <div className="pt-4 mt-2 border-t border-gray-800/80 flex flex-col gap-2.5">
-            {onNavigateToSurvey && (
+            {/* Drawer Navigation Links */}
+            <div className="flex-1 overflow-y-auto py-5 space-y-2 custom-scrollbar">
               <button
                 onClick={() => {
                   setIsMobileMenuOpen(false);
-                  onNavigateToSurvey();
+                  onNavigateToLookup();
                 }}
-                className="w-full rounded-full liquid-glass py-2.5 px-4 text-sm font-bold text-emerald-300 border border-emerald-500/30 flex items-center justify-center gap-2"
+                className="w-full text-left py-3 px-3.5 rounded-xl text-sm font-semibold text-zinc-100 hover:bg-zinc-900 border border-transparent hover:border-zinc-800 flex items-center justify-between transition-colors cursor-pointer"
               >
-                <Sparkles className="w-4 h-4 text-emerald-400" />
-                <span>Làm Khảo Sát DISC Sinh Viên</span>
+                <span>Tra Cứu Nhóm Sinh Viên</span>
+                <ArrowRight className="w-4 h-4 text-zinc-400" />
               </button>
-            )}
 
-            <button
-              onClick={() => {
-                setIsMobileMenuOpen(false);
-                setIsQuickSearchOpen(true);
-              }}
-              className="w-full rounded-full liquid-glass py-2.5 px-4 text-sm font-medium text-white flex items-center justify-center gap-2"
-            >
-              <Search className="w-4 h-4" />
-              <span>Tìm kiếm nhanh MSSV</span>
-            </button>
+              {onNavigateToSurvey && (
+                <button
+                  onClick={() => {
+                    setIsMobileMenuOpen(false);
+                    onNavigateToSurvey();
+                  }}
+                  className="w-full text-left py-3 px-3.5 rounded-xl text-sm font-bold text-emerald-300 bg-emerald-950/40 border border-emerald-500/30 hover:bg-emerald-900/50 flex items-center justify-between transition-colors cursor-pointer"
+                >
+                  <span className="flex items-center gap-2">
+                    <Sparkles className="w-4 h-4 text-emerald-400" />
+                    Làm Khảo Sát DISC
+                  </span>
+                  <span className="text-[10px] font-mono bg-emerald-500/20 text-emerald-300 px-2 py-0.5 rounded-full border border-emerald-500/30 font-bold">Mới</span>
+                </button>
+              )}
 
-            <button
-              onClick={() => {
-                setIsMobileMenuOpen(false);
-                if (onOpenAdminLogin) onOpenAdminLogin();
-              }}
-              className="w-full bg-white text-black rounded-full py-2.5 px-4 text-sm font-medium flex items-center justify-center gap-2 hover:bg-gray-200"
-            >
-              <ShieldCheck className="w-4 h-4" />
-              <span>Cổng Quản Trị & Giảng Viên</span>
-            </button>
+              <button
+                onClick={() => {
+                  setIsMobileMenuOpen(false);
+                  setCurrentSlideIndex(1);
+                  setIsDetailModalOpen(true);
+                }}
+                className="w-full text-left py-3 px-3.5 rounded-xl text-sm font-semibold text-zinc-100 hover:bg-zinc-900 border border-transparent hover:border-zinc-800 flex items-center justify-between transition-colors cursor-pointer"
+              >
+                <span>Giải Thuật Di Truyền (GA)</span>
+                <Dna className="w-4 h-4 text-emerald-400" />
+              </button>
+
+              <button
+                onClick={() => {
+                  setIsMobileMenuOpen(false);
+                  setCurrentSlideIndex(2);
+                  setIsDetailModalOpen(true);
+                }}
+                className="w-full text-left py-3 px-3.5 rounded-xl text-sm font-semibold text-zinc-100 hover:bg-zinc-900 border border-transparent hover:border-zinc-800 flex items-center justify-between transition-colors cursor-pointer"
+              >
+                <span>Ma Trận Tính Cách DISC</span>
+                <Brain className="w-4 h-4 text-sky-400" />
+              </button>
+
+              <button
+                onClick={() => {
+                  setIsMobileMenuOpen(false);
+                  setIsDetailModalOpen(true);
+                }}
+                className="w-full text-left py-3 px-3.5 rounded-xl text-sm font-semibold text-zinc-100 hover:bg-zinc-900 border border-transparent hover:border-zinc-800 flex items-center justify-between transition-colors cursor-pointer"
+              >
+                <span>Quy Trình Phân Nhóm 4 Bước</span>
+                <Layers className="w-4 h-4 text-purple-400" />
+              </button>
+            </div>
+
+            {/* Drawer Bottom Actions */}
+            <div className="pt-4 border-t border-zinc-800/80 space-y-2.5 shrink-0">
+              <button
+                onClick={() => {
+                  setIsMobileMenuOpen(false);
+                  setIsQuickSearchOpen(true);
+                }}
+                className="w-full rounded-full liquid-glass py-2.5 px-4 text-sm font-medium text-white flex items-center justify-center gap-2 cursor-pointer hover:border-emerald-400/40"
+              >
+                <Search className="w-4 h-4 text-zinc-300" />
+                <span>Tìm Kiếm Nhanh MSSV</span>
+              </button>
+
+              <button
+                onClick={() => {
+                  setIsMobileMenuOpen(false);
+                  if (onOpenAdminLogin) onOpenAdminLogin();
+                }}
+                className="w-full bg-white text-zinc-950 font-bold rounded-full py-2.5 px-4 text-sm flex items-center justify-center gap-2 hover:bg-zinc-100 shadow-md transition-colors cursor-pointer"
+              >
+                <ShieldCheck className="w-4 h-4 text-emerald-600" />
+                <span>Cổng Quản Trị & Giảng Viên</span>
+              </button>
+            </div>
+
           </div>
-        </div>
-      </div>
+        </div>,
+        document.body
+      )}
 
       {/* =========================================================
       {/* =========================================================

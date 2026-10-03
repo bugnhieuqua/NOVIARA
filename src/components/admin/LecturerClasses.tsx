@@ -87,7 +87,7 @@ export const LecturerClasses: React.FC<LecturerClassesProps> = ({
       }
     }
 
-    // Đồng bộ tức thời số lượng sinh viên nộp bài từ CSDL SQLite Backend
+    // Đồng bộ tức thời số lượng sinh viên nộp bài từ CSDL PostgreSQL Backend
     syncClassesWithBackend().then(remote => {
       if (remote && remote.length > 0) {
         setClasses(remote);
@@ -105,7 +105,7 @@ export const LecturerClasses: React.FC<LecturerClassesProps> = ({
       setDepartments(stored);
     };
 
-    // Nạp danh sách khoa từ CSDL SQLite
+    // Nạp danh sách khoa từ CSDL PostgreSQL
     syncDepartmentsWithBackend().then(remoteDepts => {
       if (remoteDepts && remoteDepts.length > 0) {
         setDepartments(remoteDepts);
@@ -337,47 +337,48 @@ export const LecturerClasses: React.FC<LecturerClassesProps> = ({
       )}
 
       {/* Page Header */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-        <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-2xl bg-zinc-950 text-white flex items-center justify-center shadow-xs">
-            <BookOpen className="w-5 h-5 text-emerald-400" />
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+        <div className="flex items-center gap-3 min-w-0">
+          <div className="w-10 h-10 rounded-2xl bg-indigo-950 text-white flex items-center justify-center shadow-xs shrink-0">
+            <BookOpen className="w-5 h-5 text-indigo-400" />
           </div>
-          <div>
-            <h1 className="font-display text-2xl font-black text-zinc-950 tracking-tight">
+          <div className="min-w-0">
+            <h1 className="font-display text-xl sm:text-2xl font-black text-zinc-950 tracking-tight truncate">
               Quản Lý Lớp Học & Khảo Sát DISC
             </h1>
-            <p className="text-xs text-zinc-500 font-medium">
-              Tạo lớp học, kích hoạt bảng khảo sát mẫu trực tuyến và tiếp nhận dữ liệu sinh viên thời gian thực
+            <p className="text-xs text-zinc-500 font-medium truncate">
+              Tạo lớp học, kích hoạt bảng khảo sát mẫu và tiếp nhận dữ liệu sinh viên
             </p>
           </div>
         </div>
 
-        {/* Action Buttons */}
-        <div className="flex flex-wrap items-center gap-2.5">
+        {/* Action Buttons - Strictly 1 ROW, LMS Standard (Tham chiếu Hình 2) */}
+        <div className="flex items-center gap-2 sm:gap-2.5 shrink-0 flex-nowrap overflow-x-auto no-scrollbar">
           <button
             onClick={() => onOpenStudentSurvey()}
-            className="flex items-center gap-2 px-4 py-2.5 text-xs font-bold bg-white text-zinc-800 hover:text-emerald-700 hover:bg-emerald-50/70 border border-slate-300 hover:border-emerald-300 rounded-xl shadow-xs transition-all cursor-pointer btn-hover-lift"
+            className="flex items-center gap-2 px-3.5 py-2.5 text-xs font-bold bg-white text-zinc-800 hover:text-indigo-700 hover:bg-indigo-50 border border-slate-300 hover:border-indigo-300 rounded-xl shadow-2xs transition-all cursor-pointer btn-hover-lift whitespace-nowrap shrink-0"
             title="Mở cổng làm khảo sát sinh viên"
           >
-            <ExternalLink className="w-4 h-4 text-emerald-600" />
-            <span>Xem Cổng Khảo Sát Sinh Viên</span>
+            <ExternalLink className="w-4 h-4 text-indigo-600 shrink-0" />
+            <span className="whitespace-nowrap">Xem Cổng Khảo Sát</span>
           </button>
 
           <button
             onClick={handleOpenCreateModal}
-            className="flex items-center gap-2 px-4 py-2.5 text-xs font-bold bg-zinc-950 hover:bg-zinc-800 text-white rounded-xl shadow-xs transition-all cursor-pointer btn-hover-lift"
+            className="flex items-center gap-2 px-4 py-2.5 text-xs font-bold bg-indigo-600 hover:bg-indigo-700 active:bg-indigo-800 text-white rounded-xl shadow-xs transition-all cursor-pointer btn-hover-lift whitespace-nowrap shrink-0"
+            title="Tạo lớp học mới"
           >
-            <Plus className="w-4 h-4 text-emerald-400" />
-            <span>Tạo Lớp Học Mới</span>
+            <Plus className="w-4 h-4 text-white shrink-0" />
+            <span className="whitespace-nowrap">Tạo Lớp Học Mới</span>
           </button>
         </div>
       </div>
 
-      {/* KPI Overview Metrics */}
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4">
+      {/* KPI Overview Metrics - 3 cột cân đối theo chuẩn LMS, lược bỏ thông tin giảng viên trùng lặp */}
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4">
 
         <div className="kpi-3d-box p-4 card-hover-lift">
-          <span className="text-[11px] font-bold uppercase tracking-wider text-zinc-400 block">Tổng Lớp Giảng Dạy</span>
+          <span className="text-[11px] font-bold uppercase tracking-wider text-zinc-500 block">Tổng Lớp Giảng Dạy</span>
           <div className="flex items-baseline gap-2 mt-1">
             <span className="font-display text-2xl font-black text-zinc-900">{classes.length}</span>
             <span className="text-xs font-semibold text-zinc-500">lớp</span>
@@ -397,15 +398,6 @@ export const LecturerClasses: React.FC<LecturerClassesProps> = ({
           <div className="flex items-baseline gap-2 mt-1">
             <span className="font-display text-2xl font-black text-indigo-700">{totalSubmissions}</span>
             <span className="text-xs font-semibold text-indigo-600">hồ sơ DISC</span>
-          </div>
-        </div>
-
-        <div className="kpi-3d-box p-4 card-hover-lift">
-          <span className="text-[11px] font-bold uppercase tracking-wider text-blue-600 block">Giảng Viên Phụ Trách</span>
-          <div className="flex items-baseline gap-1 mt-1 truncate">
-            <span className="font-display text-sm font-black text-zinc-900 truncate">
-              {currentLecturer?.name || 'Chưa phân công'}
-            </span>
           </div>
         </div>
 
@@ -471,9 +463,9 @@ export const LecturerClasses: React.FC<LecturerClassesProps> = ({
           </div>
           <button
             onClick={handleOpenCreateModal}
-            className="flex items-center gap-2 px-5 py-2.5 rounded-xl text-xs font-bold bg-zinc-950 text-white mx-auto btn-hover-lift cursor-pointer"
+            className="flex items-center gap-2 px-5 py-2.5 rounded-xl text-xs font-bold bg-indigo-600 hover:bg-indigo-700 active:bg-indigo-800 text-white mx-auto shadow-xs btn-hover-lift cursor-pointer whitespace-nowrap"
           >
-            <Plus className="w-4 h-4 text-emerald-400" />
+            <Plus className="w-4 h-4 text-white" />
             <span>Tạo Lớp Học Đầu Tiên</span>
           </button>
         </div>
@@ -759,7 +751,7 @@ export const LecturerClasses: React.FC<LecturerClassesProps> = ({
               <div className="flex items-start sm:items-center justify-between gap-3 min-w-0 w-full sm:w-auto">
                 <div className="flex items-center gap-2.5 sm:gap-3 min-w-0">
                   <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl sm:rounded-2xl bg-indigo-600 text-white flex items-center justify-center font-bold text-sm sm:text-base flex-shrink-0 shadow-xs">
-                    {inspectingClass.code.slice(0, 2)}
+                    {(inspectingClass.code || 'HP').slice(0, 2)}
                   </div>
                   <div className="min-w-0">
                     <div className="flex items-center gap-1.5 sm:gap-2 flex-wrap">

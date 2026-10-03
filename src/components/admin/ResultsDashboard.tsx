@@ -235,13 +235,13 @@ export const ResultsDashboard: React.FC<ResultsDashboardProps> = ({
           </div>
         </div>
 
-        {/* Action Buttons — Dropdown Groups + Primary Actions */}
-        <div className="flex items-center gap-2 flex-wrap">
+        {/* Action Buttons — Strictly 1 ROW, LMS Standard (Tham chiếu Hình 2) */}
+        <div className="flex items-center gap-2 shrink-0 flex-nowrap overflow-x-auto no-scrollbar">
           {/* View Mode Toggle */}
-          <div className="flex items-center p-1 rounded-full bg-slate-100 border border-slate-200 text-xs">
+          <div className="flex items-center p-1 rounded-xl bg-slate-100 border border-slate-200 text-xs shrink-0">
             <button
               onClick={() => setViewMode('grid')}
-              className={`p-1.5 rounded-full transition-all cursor-pointer ${
+              className={`p-1.5 rounded-lg transition-all cursor-pointer ${
                 viewMode === 'grid' ? 'bg-white text-indigo-600 shadow-xs' : 'text-zinc-600 hover:text-zinc-950'
               }`}
               title="Xem dạng thẻ nhóm (Grid)"
@@ -250,7 +250,7 @@ export const ResultsDashboard: React.FC<ResultsDashboardProps> = ({
             </button>
             <button
               onClick={() => setViewMode('matrix')}
-              className={`p-1.5 rounded-full transition-all cursor-pointer ${
+              className={`p-1.5 rounded-lg transition-all cursor-pointer ${
                 viewMode === 'matrix' ? 'bg-white text-indigo-600 shadow-xs' : 'text-zinc-600 hover:text-zinc-950'
               }`}
               title="Xem ma trận so sánh (Matrix)"
@@ -263,10 +263,10 @@ export const ResultsDashboard: React.FC<ResultsDashboardProps> = ({
           <div ref={exportRef} className="relative">
             <button
               onClick={() => setIsExportOpen(v => !v)}
-              className="rounded-full bg-slate-100 hover:bg-emerald-50 hover:text-emerald-700 hover:border-emerald-300 flex items-center gap-1.5 px-4 py-2 text-xs font-bold text-zinc-800 transition-colors cursor-pointer border border-slate-200 shadow-xs btn-hover-lift"
+              className="rounded-xl bg-white hover:bg-slate-50 text-zinc-800 hover:text-emerald-700 hover:border-emerald-300 flex items-center gap-1.5 px-3.5 py-2 text-xs font-bold transition-colors cursor-pointer border border-slate-300 shadow-2xs btn-hover-lift whitespace-nowrap shrink-0"
               title="Xuất dữ liệu ra các định dạng"
             >
-              <Download className="w-3.5 h-3.5 text-emerald-600" />
+              <Download className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
               <span>Xuất dữ liệu</span>
               <ChevronDown className={`w-3.5 h-3.5 text-zinc-500 transition-transform duration-200 ${isExportOpen ? 'rotate-180' : ''}`} />
             </button>
@@ -315,24 +315,24 @@ export const ResultsDashboard: React.FC<ResultsDashboardProps> = ({
           {/* Publish / Revoke — Primary CTA */}
           <button
             onClick={handlePublishToggle}
-            className={`flex items-center gap-1.5 px-5 py-2.5 text-xs font-bold rounded-full transition-all cursor-pointer shadow-sm btn-hover-lift ${
+            className={`flex items-center gap-1.5 px-4 py-2 text-xs font-bold rounded-xl transition-all cursor-pointer shadow-xs btn-hover-lift whitespace-nowrap shrink-0 ${
               isPublished
                 ? 'bg-amber-100 text-amber-900 hover:bg-amber-200 border border-amber-300'
-                : 'bg-indigo-600 hover:bg-indigo-700 text-white shadow-indigo-600/25'
+                : 'bg-indigo-600 hover:bg-indigo-700 active:bg-indigo-800 text-white'
             }`}
             title={isPublished ? "Thu hồi công bố (Sinh viên sẽ không xem được kết quả này)" : "Công bố kết quả phân nhóm cho sinh viên tra cứu"}
           >
-            <Share2 className="w-3.5 h-3.5" />
-            <span>{isPublished ? 'Thu hồi công bố' : 'Công bố cho Sinh viên'}</span>
+            <Share2 className="w-3.5 h-3.5 shrink-0" />
+            <span>{isPublished ? 'Thu hồi' : 'Công bố kết quả'}</span>
           </button>
 
           {/* Rerun GA */}
           <button
             onClick={onRerunGA}
-            className="rounded-full bg-slate-100 hover:bg-amber-50 hover:text-amber-800 hover:border-amber-300 flex items-center gap-1.5 px-4 py-2 text-xs font-bold text-zinc-800 transition-colors cursor-pointer border border-slate-200 shadow-xs btn-hover-lift"
+            className="rounded-xl bg-white hover:bg-amber-50 hover:text-amber-800 hover:border-amber-300 flex items-center gap-1.5 px-3.5 py-2 text-xs font-bold text-zinc-800 transition-colors cursor-pointer border border-slate-300 shadow-2xs btn-hover-lift whitespace-nowrap shrink-0"
             title="Chạy lại GA với tham số mới"
           >
-            <RotateCcw className="w-3.5 h-3.5 text-amber-600" />
+            <RotateCcw className="w-3.5 h-3.5 text-amber-600 shrink-0" />
             <span>Chạy lại GA</span>
           </button>
         </div>

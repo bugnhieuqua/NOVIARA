@@ -108,7 +108,7 @@ async def import_students_from_gsheet(req: GSheetImportRequest):
 
 @router.post("/upload")
 async def upload_students_file(file: UploadFile = File(...), class_id: Optional[str] = None):
-    """Tải lên file Excel/CSV, lưu tệp vào CSDL SQLite và tự động trích xuất hồ sơ sinh viên bền vững."""
+    """Tải lên file Excel/CSV, lưu tệp vào CSDL PostgreSQL và tự động trích xuất hồ sơ sinh viên bền vững."""
     if not file.filename:
         raise HTTPException(status_code=400, detail="Không có tệp nào được chọn.")
 
@@ -136,7 +136,7 @@ async def upload_students_file(file: UploadFile = File(...), class_id: Optional[
         content = await file.read()
         result = parse_student_file(content, file.filename)
 
-        # Lưu file và danh sách sinh viên bền vững vào CSDL SQLite
+        # Lưu file và danh sách sinh viên bền vững vào CSDL PostgreSQL
         file_id = f"FILE-{int(time.time())}"
         file_size = len(content)
         file_type = file.filename.split('.')[-1].upper()
@@ -282,7 +282,7 @@ class BulkStudentsRequest(BaseModel):
 
 @router.post("/bulk")
 async def save_bulk_students(req: BulkStudentsRequest):
-    """Lưu danh sách sinh viên nạp từ tệp Excel/CSV/Google Sheets vào CSDL SQLite bền vững."""
+    """Lưu danh sách sinh viên nạp từ tệp Excel/CSV/Google Sheets vào CSDL PostgreSQL bền vững."""
     from backend.database import get_db_connection
     with get_db_connection() as conn:
         for s in req.students:
@@ -343,7 +343,7 @@ async def save_bulk_students(req: BulkStudentsRequest):
 
 @router.get("/files")
 async def get_uploaded_files():
-    """Lấy danh sách các file dữ liệu đã nạp lưu trong CSDL SQLite."""
+    """Lấy danh sách các file dữ liệu đã nạp lưu trong CSDL PostgreSQL."""
     from backend.database import query_all
     return query_all("""
         SELECT id, filename, file_size, file_type, total_records, created_at 

@@ -61,11 +61,9 @@ export function exportLecturerAccountsToExcel(
     'Mã Giảng Viên',
     'Họ và Tên',
     'Khoa / Bộ Môn',
-    'Email Đăng Nhập (.edu)',
+    'Email Đăng Nhập',
     'Tên Đăng Nhập',
     'Mật Khẩu Khởi Tạo',
-    'Yêu Cầu Đổi MK Lần Đầu',
-    'Trạng Thái',
     'Ngày Cấp Tài Khoản'
   ];
 
@@ -77,8 +75,6 @@ export function exportLecturerAccountsToExcel(
     acc.email,
     acc.username,
     acc.password || DEFAULT_LECTURER_PASSWORD,
-    acc.mustChangePassword ? 'Bắt buộc đổi lần đầu' : 'Đã đổi an toàn',
-    'Đã kích hoạt',
     acc.createdAt || new Date().toISOString().slice(0, 19).replace('T', ' '),
   ]);
 
@@ -87,13 +83,11 @@ export function exportLecturerAccountsToExcel(
   ws['!cols'] = [
     { wch: 6 },  // STT
     { wch: 16 }, // Mã GV
-    { wch: 26 }, // Họ tên
+    { wch: 28 }, // Họ tên
     { wch: 32 }, // Khoa
     { wch: 30 }, // Email
-    { wch: 18 }, // Username
-    { wch: 20 }, // Pass mặc định
-    { wch: 24 }, // Yêu cầu đổi pass
-    { wch: 18 }, // Trạng thái
+    { wch: 20 }, // Username
+    { wch: 22 }, // Mật khẩu khởi tạo
     { wch: 22 }, // Ngày cấp
   ];
 

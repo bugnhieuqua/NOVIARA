@@ -73,7 +73,7 @@ export const StudentSurvey: React.FC<StudentSurveyProps> = ({
         }
       }
 
-      // Đồng bộ từ CSDL SQLite Backend
+      // Đồng bộ từ CSDL PostgreSQL Backend
       syncClassesWithBackend().then(remote => {
         if (remote && remote.length > 0) {
           setClasses(remote);

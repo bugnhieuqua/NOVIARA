@@ -24,11 +24,7 @@ def setup_db():
 
 def test_database_init_and_tables():
     """Kiểm tra toàn bộ 11 bảng CSDL đã được tạo trong CSDL."""
-    from backend.config import DB_ENGINE
-    if DB_ENGINE == "postgres":
-        tables = query_all("SELECT table_name as name FROM information_schema.tables WHERE table_schema = 'public'")
-    else:
-        tables = query_all("SELECT name FROM sqlite_master WHERE type='table' AND name NOT LIKE 'sqlite_%'")
+    tables = query_all("SELECT table_name as name FROM information_schema.tables WHERE table_schema = 'public'")
     table_names = {t["name"] for t in tables}
     
     expected_tables = {
@@ -167,7 +163,14 @@ def test_survey_closed_rejection():
 
 
 def test_uploaded_files_and_students_persistence():
-    """Kiểm tra lưu tệp tải lên vào SQLite và đồng bộ danh sách sinh viên bền vững."""
+    """Kiểm tra lưu tệp tải lên vào PostgreSQL và đồng bộ danh sách sinh viên bền vững."""
+    from backend.database import execute_commit
+    execute_commit("""
+        INSERT INTO classes (id, name, code, semester, department, is_survey_active)
+        VALUES ('CLASS-UPLOAD-TEST', 'Lớp Test Upload', 'LTU01', 'Kỳ 1', 'CNTT', TRUE)
+        ON CONFLICT (id) DO NOTHING
+    """)
+
     csv_content = (
         "MSSV,Họ và Tên,Email,Giới Tính,GPA,Kỹ Năng Chính,Kỹ Năng Phụ,DISC,Ứng Viên Leader\n"
         "SV2026TEST01,Nguyễn Văn Test,test1@uni.edu.vn,Nam,3.75,backend,database,D,Có\n"
@@ -175,7 +178,7 @@ def test_uploaded_files_and_students_persistence():
     ).encode("utf-8")
 
     files = {"file": ("test_students.csv", csv_content, "text/csv")}
-    res = client.post("/api/students/upload", files=files)
+    res = client.post("/api/students/upload?class_id=CLASS-UPLOAD-TEST", files=files)
     assert res.status_code == 200
     data = res.json()
     assert data["saved_to_db"] is True
@@ -204,6 +207,7 @@ def test_uploaded_files_and_students_persistence():
     execute_commit("DELETE FROM class_students WHERE student_id IN ('SV2026TEST01', 'SV2026TEST02')")
     execute_commit("DELETE FROM students WHERE student_id IN ('SV2026TEST01', 'SV2026TEST02')")
     execute_commit("DELETE FROM uploaded_files WHERE filename = 'test_students.csv'")
+    execute_commit("DELETE FROM classes WHERE id = 'CLASS-UPLOAD-TEST'")
 
 
 def test_grouping_sessions_persistence_publish_and_revoke():
@@ -269,7 +273,7 @@ def test_grouping_sessions_persistence_publish_and_revoke():
         ]
     }
 
-    # 1. Lưu phiên phân nhóm vào CSDL SQLite (bản nháp draft)
+    # 1. Lưu phiên phân nhóm vào CSDL PostgreSQL (bản nháp draft)
     res_save = client.post("/api/sessions", json=session_payload)
     assert res_save.status_code == 201
 

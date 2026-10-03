@@ -120,7 +120,7 @@ export const ExportHubModal: React.FC<ExportHubModalProps> = ({
     setUrlError('');
     setSyncStatus('syncing');
 
-    // Lưu liên kết vào CSDL SQLite cho phiên phân nhóm
+    // Lưu liên kết vào CSDL PostgreSQL cho phiên phân nhóm
     await saveSessionSheetsUrlToBackend(session.id, trimmed);
     session.googleSheetsUrl = trimmed;
 

@@ -9,7 +9,7 @@ export interface DepartmentItem {
 // Tuyệt đối KHÔNG hardcode bất kỳ danh sách khoa nào trong code
 export const INITIAL_DEPARTMENTS: DepartmentItem[] = [];
 
-// Danh sách khoa / bộ môn lưu trong bộ nhớ (Tuyệt đối KHÔNG dùng localStorage, nạp 100% từ SQLite)
+// Danh sách khoa / bộ môn lưu trong bộ nhớ (Tuyệt đối KHÔNG dùng localStorage, nạp 100% từ PostgreSQL)
 let memoryDepartments: DepartmentItem[] = [];
 
 export function getStoredDepartments(): DepartmentItem[] {
@@ -24,7 +24,7 @@ export function saveStoredDepartments(depts: DepartmentItem[]): void {
 }
 
 /**
- * Đồng bộ danh sách Khoa / Bộ môn trực tiếp từ CSDL Backend SQLite (/api/departments)
+ * Đồng bộ danh sách Khoa / Bộ môn trực tiếp từ CSDL Backend PostgreSQL (/api/departments)
  */
 export async function syncDepartmentsWithBackend(): Promise<DepartmentItem[]> {
   try {
@@ -35,16 +35,16 @@ export async function syncDepartmentsWithBackend(): Promise<DepartmentItem[]> {
         const items: DepartmentItem[] = data.departments.map((d: any, idx: number) => ({
           id: d.id || `DEPT-${idx + 1}`,
           code: d.code || (d.name ? d.name.replace(/[^A-Za-z0-9]/g, '').slice(0, 6).toUpperCase() : `D${idx + 1}`),
-          name: d.name,
+          name: d.name || `Khoa ${idx + 1}`,
           description: d.description || '',
-          createdAt: d.created_at ? d.created_at.slice(0, 10) : new Date().toISOString().slice(0, 10),
+          createdAt: d.created_at ? String(d.created_at).slice(0, 10) : (d.createdAt ? String(d.createdAt).slice(0, 10) : new Date().toISOString().slice(0, 10)),
         }));
         saveStoredDepartments(items);
         return items;
       }
     }
   } catch (e) {
-    console.warn('[Sync] Không kết nối được Backend CSDL SQLite:', e);
+    console.warn('[Sync] Không kết nối được Backend CSDL PostgreSQL:', e);
   }
   return memoryDepartments;
 }
@@ -80,7 +80,7 @@ export function addDepartment(
   const updated = [...current, newItem];
   saveStoredDepartments(updated);
 
-  // Đồng bộ lưu trực tiếp vào CSDL SQLite Backend
+  // Đồng bộ lưu trực tiếp vào CSDL PostgreSQL Backend
   fetch('/api/departments', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
@@ -95,7 +95,7 @@ export function addDepartment(
         }
       }
     })
-    .catch(err => console.warn('[SQLite Save Department Error]', err));
+    .catch(err => console.warn('[PostgreSQL Save Department Error]', err));
 
   return newItem;
 }
@@ -132,7 +132,7 @@ export async function updateDepartment(
   };
   saveStoredDepartments(current);
 
-  // Đồng bộ ngay lập tức sang CSDL SQLite Backend
+  // Đồng bộ ngay lập tức sang CSDL PostgreSQL Backend
   try {
     const res = await fetch(`/api/departments/${encodeURIComponent(id)}`, {
       method: 'PUT',
@@ -151,7 +151,7 @@ export async function updateDepartment(
       }
     }
   } catch (err) {
-    console.warn('[SQLite Update Department Error]', err);
+    console.warn('[PostgreSQL Update Department Error]', err);
   }
 
   return true;
@@ -159,17 +159,22 @@ export async function updateDepartment(
 
 export async function deleteDepartment(id: string): Promise<boolean> {
   const current = getStoredDepartments();
+  const target = current.find(d => d.id === id);
   const filtered = current.filter(d => d.id !== id);
-  if (filtered.length === current.length) return false;
   saveStoredDepartments(filtered);
 
-  // Xóa trực tiếp khỏi CSDL SQLite Backend
+  // Xóa trực tiếp khỏi CSDL Backend
   try {
-    await fetch(`/api/departments/${encodeURIComponent(id)}`, {
+    const res = await fetch(`/api/departments/${encodeURIComponent(id)}`, {
       method: 'DELETE',
     });
+    if (!res.ok && target?.name) {
+      await fetch(`/api/departments/${encodeURIComponent(target.name)}`, {
+        method: 'DELETE',
+      });
+    }
   } catch (err) {
-    console.warn('[SQLite Delete Department Error]', err);
+    console.warn('[Backend Delete Department Error]', err);
   }
 
   return true;

@@ -427,7 +427,7 @@ export const StudentPortal: React.FC<StudentPortalProps> = ({
                           : 'bg-white text-zinc-700 hover:bg-indigo-50 hover:text-indigo-700 hover:border-indigo-200 border-slate-200'
                         }`}
                     >
-                      {st.id} ({st.name.split(' ').slice(-1)[0]} • {st.disc?.dominant || 'S'})
+                      {st.id} ({st.name ? st.name.split(' ').slice(-1)[0] : st.id} • {st.disc?.dominant || 'S'})
                     </button>
                   ))}
                 </div>
@@ -689,7 +689,7 @@ export const StudentPortal: React.FC<StudentPortalProps> = ({
               <div className="p-6 bg-gradient-to-r from-slate-50 via-indigo-50/40 to-slate-50 border-b border-slate-200/90 flex flex-col sm:flex-row sm:items-center justify-between gap-4 shadow-inner">
                 <div className="flex items-center gap-4">
                   <div className="w-12 h-12 rounded-2xl bg-indigo-600 text-white font-display font-bold text-lg flex items-center justify-center shadow-md shadow-indigo-600/30">
-                    {activeStudent.name.slice(0, 1)}
+                    {(activeStudent.name || '?').slice(0, 1)}
                   </div>
                   <div>
                     <div className="flex items-center gap-2 flex-wrap">
@@ -762,7 +762,7 @@ export const StudentPortal: React.FC<StudentPortalProps> = ({
                                   : 'bg-slate-100 text-zinc-800 border border-slate-200'
                               }`}
                           >
-                            {member.name.slice(0, 1)}
+                            {(member.name || '?').slice(0, 1)}
                           </div>
                           <div>
                             <div className="flex items-center gap-2">

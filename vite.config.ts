@@ -18,10 +18,6 @@ export default defineConfig(() => {
       watch: process.env.DISABLE_HMR === 'true' ? null : {
         ignored: [
           '**/backend/**',
-          '**/*.db',
-          '**/*.db-*',
-          '**/*.sqlite',
-          '**/*.sqlite3',
           '**/data/**',
           '**/__pycache__/**',
           '**/.pytest_cache/**',

@@ -57,7 +57,6 @@ export const LecturerManagement: React.FC<LecturerManagementProps> = ({
   const [departments, setDepartments] = useState<DepartmentItem[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedDepartment, setSelectedDepartment] = useState('all');
-  const [selectedStatus, setSelectedStatus] = useState<'all' | 'default' | 'activated'>('all');
 
   // Selection for bulk actions
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
@@ -267,7 +266,7 @@ export const LecturerManagement: React.FC<LecturerManagementProps> = ({
           username: formData.username.trim() || formData.email.split('@')[0],
           department: formData.department.trim(),
           phone: formData.phone.trim(),
-          password: formData.password || DEFAULT_LECTURER_PASSWORD,
+          password: formData.password.trim() || DEFAULT_LECTURER_PASSWORD,
           mustChangePassword: formData.mustChangePassword,
         });
 
@@ -324,10 +323,11 @@ export const LecturerManagement: React.FC<LecturerManagementProps> = ({
   const handleConfirmDeleteDept = async () => {
     if (deletingDeptId) {
       const target = departments.find(d => d.id === deletingDeptId);
-      await deleteDepartment(deletingDeptId);
-      showToast(`Đã xóa ${target?.name || deletingDeptId}`);
+      const targetId = deletingDeptId;
       setDeletingDeptId(null);
-      loadData();
+      await deleteDepartment(targetId);
+      showToast(`Đã xóa Khoa: ${target?.name || targetId}`);
+      await loadData();
     }
   };
 
@@ -390,12 +390,11 @@ export const LecturerManagement: React.FC<LecturerManagementProps> = ({
       'STT': idx + 1,
       'Mã GV': l.id,
       'Họ và Tên': l.name,
-      'Email Trường': l.email,
+      'Khoa / Bộ Môn': l.department || 'Chưa gán khoa',
+      'Email Đăng Nhập': l.email,
       'Tên Đăng Nhập': l.username,
-      'Khoa / Bộ Môn': l.department,
-      'Số Điện Thoại': l.phone || '',
-      'Trạng Thái': l.mustChangePassword ? 'Chờ đổi mật khẩu lần đầu' : 'Đã kích hoạt an toàn',
-      'Ngày Cấp': l.createdAt,
+      'Mật Khẩu Khởi Tạo': l.password || DEFAULT_LECTURER_PASSWORD,
+      'Ngày Cấp': l.createdAt ? String(l.createdAt).slice(0, 10) : '',
     }));
 
     const ws = XLSX.utils.json_to_sheet(data);
@@ -406,12 +405,11 @@ export const LecturerManagement: React.FC<LecturerManagementProps> = ({
       { wch: 6 },
       { wch: 14 },
       { wch: 28 },
-      { wch: 30 },
-      { wch: 18 },
       { wch: 32 },
-      { wch: 16 },
-      { wch: 24 },
+      { wch: 30 },
       { wch: 20 },
+      { wch: 22 },
+      { wch: 16 },
     ];
 
     XLSX.writeFile(wb, `DS_GiangVien_NOVIARA_${new Date().toISOString().slice(0, 10)}.xlsx`);
@@ -425,19 +423,10 @@ export const LecturerManagement: React.FC<LecturerManagementProps> = ({
       !q ||
       l.name.toLowerCase().includes(q) ||
       l.email.toLowerCase().includes(q) ||
-      l.username.toLowerCase().includes(q) ||
-      (l.phone && l.phone.includes(q));
+      l.username.toLowerCase().includes(q);
 
     const matchDept = selectedDepartment === 'all' || l.department === selectedDepartment;
-
-    let matchStatus = true;
-    if (selectedStatus === 'default') {
-      matchStatus = l.mustChangePassword === true;
-    } else if (selectedStatus === 'activated') {
-      matchStatus = l.mustChangePassword === false;
-    }
-
-    return matchQuery && matchDept && matchStatus;
+    return matchQuery && matchDept;
   });
 
   const isAllSelected = filteredLecturers.length > 0 && filteredLecturers.every(l => selectedIds.includes(l.id));
@@ -483,48 +472,47 @@ export const LecturerManagement: React.FC<LecturerManagementProps> = ({
       )}
 
       {/* Page Header */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-        <div>
-          <div className="flex items-center gap-2">
-            <div className="w-9 h-9 rounded-xl bg-zinc-950 text-white flex items-center justify-center shadow-xs">
-              <GraduationCap className="w-5 h-5 text-emerald-400" />
-            </div>
-            <div>
-              <h1 className="font-display text-2xl font-black text-zinc-950 tracking-tight">
-                Quản Lý Giảng Viên & Khoa / Đơn Vị
-              </h1>
-
-            </div>
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+        <div className="flex items-center gap-3 min-w-0">
+          <div className="w-10 h-10 rounded-2xl bg-zinc-950 text-white flex items-center justify-center shadow-xs shrink-0">
+            <GraduationCap className="w-5 h-5 text-emerald-400" />
+          </div>
+          <div className="min-w-0">
+            <h1 className="font-display text-xl sm:text-2xl font-black text-zinc-950 tracking-tight truncate">
+              Quản Lý Giảng Viên &amp; Khoa / Đơn Vị
+            </h1>
+            <p className="text-xs text-zinc-500 font-medium truncate mt-0.5">
+              Quản trị danh sách nhân sự đào tạo, đơn vị khoa phòng ban và bảo mật tài khoản
+            </p>
           </div>
         </div>
 
-        {/* Top Action Buttons */}
-        <div className="flex flex-wrap items-center gap-2.5">
-
+        {/* Top Action Buttons - Strictly 1 ROW, LMS Standard (Tham chiếu Hình 2) */}
+        <div className="flex items-center gap-2 shrink-0 flex-nowrap overflow-x-auto no-scrollbar">
           <button
             onClick={onOpenAILecturerAgent}
-            className="btn-3d-emerald flex items-center gap-2 px-4 py-2.5 text-xs font-bold shadow-xs btn-hover-lift"
+            className="flex items-center justify-center gap-2 px-3.5 py-2 text-xs font-bold bg-purple-600 hover:bg-purple-700 active:bg-purple-800 text-white rounded-xl shadow-xs btn-hover-lift h-10 whitespace-nowrap shrink-0"
             title="AI Agent tự động nhận diện Khoa theo file Excel và tạo tài khoản"
           >
-            <Bot className="w-4 h-4 text-emerald-950" />
+            <Bot className="w-4 h-4 text-purple-200 shrink-0" />
             <span>AI Agent Cấp Hàng Loạt</span>
-            <span className="text-[10px] font-mono bg-emerald-200 text-emerald-950 px-1.5 py-0.5 rounded font-black">AI</span>
+            <span className="text-[10px] font-mono bg-purple-800 text-white px-1.5 py-0.5 rounded font-black">AI</span>
           </button>
 
           {activeSubTab === 'lecturers' ? (
             <button
               onClick={handleOpenCreate}
-              className="btn-3d-primary flex items-center gap-2 px-4 py-2.5 text-xs font-bold bg-zinc-950 hover:bg-zinc-800 text-white shadow-xs btn-hover-lift"
+              className="flex items-center justify-center gap-2 px-4 py-2 text-xs font-bold bg-indigo-600 hover:bg-indigo-700 active:bg-indigo-800 text-white rounded-xl shadow-xs btn-hover-lift h-10 whitespace-nowrap shrink-0"
             >
-              <Plus className="w-4 h-4 text-emerald-400" />
+              <Plus className="w-4 h-4 text-white shrink-0" />
               <span>Thêm Giảng Viên</span>
             </button>
           ) : (
             <button
               onClick={handleOpenCreateDept}
-              className="btn-3d-primary flex items-center gap-2 px-4 py-2.5 text-xs font-bold bg-zinc-950 hover:bg-zinc-800 text-white shadow-xs btn-hover-lift"
+              className="flex items-center justify-center gap-2 px-4 py-2 text-xs font-bold bg-indigo-600 hover:bg-indigo-700 active:bg-indigo-800 text-white rounded-xl shadow-xs btn-hover-lift h-10 whitespace-nowrap shrink-0"
             >
-              <Plus className="w-4 h-4 text-emerald-400" />
+              <Plus className="w-4 h-4 text-white shrink-0" />
               <span>Thêm Khoa Mới</span>
             </button>
           )}
@@ -532,22 +520,21 @@ export const LecturerManagement: React.FC<LecturerManagementProps> = ({
           {lecturers.length > 0 && activeSubTab === 'lecturers' && (
             <button
               onClick={handleExportExcel}
-              className="flex items-center gap-2 px-3.5 py-2.5 text-xs font-bold bg-white text-zinc-800 hover:text-emerald-700 hover:bg-emerald-50/70 border border-slate-300 hover:border-emerald-300 rounded-xl shadow-xs transition-all cursor-pointer flex-shrink-0 btn-hover-lift"
+              className="flex items-center justify-center gap-2 px-3.5 py-2 text-xs font-bold bg-white text-zinc-800 hover:text-emerald-700 hover:bg-emerald-50/70 border border-slate-300 hover:border-emerald-300 rounded-xl shadow-2xs transition-all cursor-pointer h-10 btn-hover-lift whitespace-nowrap shrink-0"
               title="Xuất file Excel danh sách tài khoản giảng viên hiện tại"
             >
-              <Download className="w-4 h-4 text-emerald-600 flex-shrink-0" />
+              <Download className="w-4 h-4 text-emerald-600 shrink-0" />
               <span className="font-bold">Xuất Excel ({lecturers.length})</span>
             </button>
           )}
-
         </div>
       </div>
 
       {/* Navigation Sub-Tabs: Danh sách Giảng viên vs Quản lý Khoa */}
-      <div className="flex items-center gap-1.5 p-1.5 bg-slate-100/90 rounded-2xl border border-slate-200/80 w-fit">
+      <div className="flex items-center gap-1.5 p-1.5 bg-slate-100/90 rounded-2xl border border-slate-200/80 w-full sm:w-fit overflow-x-auto no-scrollbar">
         <button
           onClick={() => setActiveSubTab('lecturers')}
-          className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer ${activeSubTab === 'lecturers'
+          className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer shrink-0 ${activeSubTab === 'lecturers'
             ? 'bg-white text-zinc-950 shadow-xs border border-slate-200/80 font-black'
             : 'text-zinc-500 hover:text-zinc-900 hover:bg-white/50'
             }`}
@@ -562,7 +549,7 @@ export const LecturerManagement: React.FC<LecturerManagementProps> = ({
 
         <button
           onClick={() => setActiveSubTab('departments')}
-          className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer ${activeSubTab === 'departments'
+          className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer shrink-0 ${activeSubTab === 'departments'
             ? 'bg-white text-zinc-950 shadow-xs border border-slate-200/80 font-black'
             : 'text-zinc-500 hover:text-zinc-900 hover:bg-white/50'
             }`}
@@ -582,96 +569,103 @@ export const LecturerManagement: React.FC<LecturerManagementProps> = ({
       {activeSubTab === 'lecturers' && (
         <div className="space-y-4">
 
+          {/* Strict Rule Notice Banner when departments is 0 */}
+          {departments.length === 0 && (
+            <div className="card-3d bg-amber-50 border border-amber-300/80 p-4 rounded-2xl flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-amber-900 shadow-xs animate-in fade-in">
+              <div className="flex items-start gap-3">
+                <div className="w-9 h-9 rounded-xl bg-amber-500 text-white flex items-center justify-center flex-shrink-0 shadow-xs">
+                  <Building2 className="w-5 h-5 text-amber-950" />
+                </div>
+                <div>
+                  <div className="text-xs font-bold flex items-center gap-1.5 text-amber-950">
+                    <span>Quy định hệ thống: &quot;Có khoa mới có giảng viên&quot;</span>
+                    <span className="px-1.5 py-0.2 rounded bg-amber-200 text-amber-900 text-[10px] font-mono font-bold">Chưa có Khoa</span>
+                  </div>
+                  <p className="text-[11px] text-amber-800/90 mt-0.5 leading-relaxed">
+                    Hệ thống chưa ghi nhận Khoa / Bộ môn nào. Vui lòng tạo danh mục Khoa trước khi thêm mới hoặc phân bổ tài khoản Giảng viên.
+                  </p>
+                </div>
+              </div>
+              <button
+                onClick={() => {
+                  setActiveSubTab('departments');
+                  handleOpenCreateDept();
+                }}
+                className="btn-3d-primary flex items-center justify-center gap-2 px-4 py-2 text-xs font-bold bg-amber-900 hover:bg-amber-950 text-white rounded-xl shadow-xs whitespace-nowrap btn-hover-lift self-end sm:self-auto"
+              >
+                <Plus className="w-4 h-4 text-amber-300" />
+                <span>Khởi Tạo Khoa Ngay</span>
+              </button>
+            </div>
+          )}
+
           {/* Metrics Banner */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
+          <div className="grid grid-cols-2 lg:grid-cols-3 gap-2.5 sm:gap-4">
 
-            <div className="kpi-3d-box p-4 card-hover-lift">
-              <span className="text-[11px] font-bold uppercase tracking-wider text-zinc-400 block">Tổng Giảng Viên</span>
-              <div className="flex items-baseline gap-2 mt-1">
-                <span className="font-display text-2xl font-black text-zinc-900">{lecturers.length}</span>
-                <span className="text-xs font-semibold text-zinc-500">tài khoản</span>
+            <div className="kpi-3d-box p-3.5 sm:p-4 card-hover-lift">
+              <span className="text-[10px] sm:text-[11px] font-bold uppercase tracking-wider text-zinc-400 block truncate">Tổng Giảng Viên</span>
+              <div className="flex items-baseline gap-1.5 sm:gap-2 mt-1">
+                <span className="font-display text-xl sm:text-2xl font-black text-zinc-900">{lecturers.length}</span>
+                <span className="text-[11px] sm:text-xs font-semibold text-zinc-500">tài khoản</span>
               </div>
             </div>
 
-            <div className="kpi-3d-box p-4 card-hover-lift">
-              <span className="text-[11px] font-bold uppercase tracking-wider text-blue-600 block">Tổng Khoa / Đơn Vị</span>
-              <div className="flex items-baseline gap-2 mt-1">
-                <span className="font-display text-2xl font-black text-blue-900">{departments.length}</span>
-                <span className="text-xs font-semibold text-blue-600">khoa</span>
+            <div className="kpi-3d-box p-3.5 sm:p-4 card-hover-lift">
+              <span className="text-[10px] sm:text-[11px] font-bold uppercase tracking-wider text-blue-600 block truncate">Tổng Khoa / Đơn Vị</span>
+              <div className="flex items-baseline gap-1.5 sm:gap-2 mt-1">
+                <span className="font-display text-xl sm:text-2xl font-black text-blue-900">{departments.length}</span>
+                <span className="text-[11px] sm:text-xs font-semibold text-blue-600">khoa</span>
               </div>
             </div>
 
-            <div className="kpi-3d-box p-4 card-hover-lift">
-              <span className="text-[11px] font-bold uppercase tracking-wider text-amber-500 block">Chờ Đổi Pass Lần Đầu</span>
-              <div className="flex items-baseline gap-2 mt-1">
-                <span className="font-display text-2xl font-black text-amber-700">
-                  {lecturers.filter(l => l.mustChangePassword).length}
-                </span>
-                <span className="text-xs font-semibold text-amber-600">tài khoản</span>
-              </div>
-            </div>
-
-            <div className="kpi-3d-box p-4 card-hover-lift">
-              <span className="text-[11px] font-bold uppercase tracking-wider text-emerald-600 block">Đã Kích Hoạt An Toàn</span>
-              <div className="flex items-baseline gap-2 mt-1">
-                <span className="font-display text-2xl font-black text-emerald-800">
+            <div className="kpi-3d-box p-3.5 sm:p-4 card-hover-lift col-span-2 lg:col-span-1">
+              <span className="text-[10px] sm:text-[11px] font-bold uppercase tracking-wider text-emerald-600 block truncate">Tài Khoản Hoạt Động</span>
+              <div className="flex items-baseline gap-1.5 sm:gap-2 mt-1">
+                <span className="font-display text-xl sm:text-2xl font-black text-emerald-700">
                   {lecturers.filter(l => !l.mustChangePassword).length}
                 </span>
-                <span className="text-xs font-semibold text-emerald-600">tài khoản</span>
+                <span className="text-[11px] sm:text-xs font-semibold text-emerald-600">đã kích hoạt</span>
               </div>
             </div>
 
           </div>
 
           {/* Filter and Search Bar */}
-          <div className="card-3d p-4 bg-white border border-slate-300 space-y-3">
-            <div className="flex flex-col md:flex-row items-stretch md:items-center justify-between gap-3">
+          <div className="card-3d p-3.5 sm:p-4 bg-white border border-slate-300 space-y-3">
+            <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-2.5 sm:gap-3">
 
               {/* Search */}
-              <div className="relative flex-1 min-w-[240px]">
+              <div className="relative flex-1">
                 <Search className="w-4 h-4 text-zinc-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
                 <input
                   type="text"
                   value={searchQuery}
                   onChange={e => setSearchQuery(e.target.value)}
-                  placeholder="Tìm theo tên, email, username, SĐT..."
+                  placeholder="Tìm theo tên giảng viên, email, username..."
                   className="input-3d w-full pl-9 pr-8 py-2 text-xs text-zinc-900 border border-slate-300 rounded-xl focus:border-emerald-600"
                 />
                 {searchQuery && (
                   <button
                     onClick={() => setSearchQuery('')}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-400 hover:text-zinc-700"
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-400 hover:text-zinc-700 cursor-pointer"
                   >
                     <X className="w-3.5 h-3.5" />
                   </button>
                 )}
               </div>
 
-              {/* Department & Status filters */}
-              <div className="flex flex-wrap sm:flex-nowrap items-center gap-2">
-                <div className="flex items-center gap-2 flex-1 sm:flex-initial">
-                  <Filter className="w-3.5 h-3.5 text-zinc-400 flex-shrink-0" />
-                  <select
-                    value={selectedDepartment}
-                    onChange={e => setSelectedDepartment(e.target.value)}
-                    className="input-3d px-3 py-2 text-xs text-zinc-800 border border-slate-300 rounded-xl bg-white w-full sm:w-56"
-                  >
-                    <option value="all">Tất cả Khoa / Bộ môn ({departments.length})</option>
-                    {departments.map((dept) => (
-                      <option key={dept.id} value={dept.name}>{dept.name}</option>
-                    ))}
-                  </select>
-                </div>
-
-                {/* Status filter */}
+              {/* Department filter */}
+              <div className="flex items-center gap-1.5 w-full sm:w-64">
+                <Filter className="w-3.5 h-3.5 text-zinc-400 flex-shrink-0" />
                 <select
-                  value={selectedStatus}
-                  onChange={e => setSelectedStatus(e.target.value as any)}
-                  className="input-3d px-3 py-2 text-xs text-zinc-800 border border-slate-300 rounded-xl bg-white w-full sm:w-44"
+                  value={selectedDepartment}
+                  onChange={e => setSelectedDepartment(e.target.value)}
+                  className="input-3d px-3 py-2 text-xs text-zinc-800 border border-slate-300 rounded-xl bg-white w-full truncate cursor-pointer"
                 >
-                  <option value="all">Tất cả trạng thái</option>
-                  <option value="default">Chờ đổi pass lần đầu</option>
-                  <option value="activated">Đã kích hoạt an toàn</option>
+                  <option value="all">Tất cả Khoa / Bộ môn ({departments.length})</option>
+                  {departments.map((dept) => (
+                    <option key={dept.id} value={dept.name}>{dept.name}</option>
+                  ))}
                 </select>
               </div>
 
@@ -744,11 +738,11 @@ export const LecturerManagement: React.FC<LecturerManagementProps> = ({
             <div className="card-3d bg-white border border-slate-200/80 rounded-2xl overflow-hidden shadow-xs w-full max-w-full min-w-0">
 
               {/* DESKTOP TABLE VIEW (Visible on >= md) */}
-              <div className="hidden md:block overflow-x-auto">
+              <div className="hidden md:block overflow-x-auto custom-scrollbar">
                 <table className="w-full text-left text-xs">
                   <thead className="bg-slate-50/90 text-zinc-500 uppercase tracking-wider text-[11px] font-bold border-b border-slate-200/80">
                     <tr>
-                      <th className="py-3.5 px-4 w-12 text-center">
+                      <th className="py-3 px-3 w-10 text-center">
                         <input
                           type="checkbox"
                           checked={isAllSelected}
@@ -756,12 +750,10 @@ export const LecturerManagement: React.FC<LecturerManagementProps> = ({
                           className="w-4 h-4 rounded border-slate-300 text-emerald-600 focus:ring-emerald-500 cursor-pointer"
                         />
                       </th>
-                      <th className="py-3.5 px-4 min-w-[280px]">Giảng Viên</th>
-                      <th className="py-3.5 px-4 min-w-[240px]">Email & Tài Khoản</th>
-                      <th className="py-3.5 px-4 min-w-[220px]">Khoa / Bộ Môn</th>
-                      <th className="py-3.5 px-4 min-w-[140px]">Điện Thoại</th>
-                      <th className="py-3.5 px-4 min-w-[170px] text-center">Trạng Thái</th>
-                      <th className="py-3.5 px-4 min-w-[130px] text-right">Thao Tác</th>
+                      <th className="py-3 px-3 min-w-[220px]">Giảng Viên</th>
+                      <th className="py-3 px-3 min-w-[200px]">Email &amp; Tài Khoản</th>
+                      <th className="py-3 px-3 min-w-[200px]">Khoa / Bộ Môn</th>
+                      <th className="py-3 px-3 min-w-[120px] text-right">Thao Tác</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-slate-100">
@@ -774,7 +766,7 @@ export const LecturerManagement: React.FC<LecturerManagementProps> = ({
                           key={lecturer.id}
                           className={`hover:bg-slate-50/80 transition-colors ${isSelected ? 'bg-emerald-50/40' : ''}`}
                         >
-                          <td className="py-3.5 px-4 text-center">
+                          <td className="py-3 px-3 text-center">
                             <input
                               type="checkbox"
                               checked={isSelected}
@@ -783,21 +775,23 @@ export const LecturerManagement: React.FC<LecturerManagementProps> = ({
                             />
                           </td>
 
-                          <td className="py-3.5 px-4">
-                            <div className="flex items-center gap-3">
-                              <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-zinc-800 to-zinc-950 text-white font-black flex items-center justify-center text-sm flex-shrink-0 shadow-xs ring-2 ring-slate-100">
-                                {lecturer.name.trim().slice(0, 1).toUpperCase()}
+                          <td className="py-3 px-3">
+                            <div className="flex items-center gap-2.5">
+                              <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-zinc-800 to-zinc-950 text-white font-black flex items-center justify-center text-xs flex-shrink-0 shadow-xs ring-2 ring-slate-100">
+                                {(lecturer.name || '?').trim().slice(0, 1).toUpperCase()}
                               </div>
-                              <div>
-                                <div className="font-bold text-zinc-900 text-xs sm:text-sm flex items-center gap-2 whitespace-nowrap">
-                                  <span className="hover:text-emerald-700 transition-colors">{lecturer.name}</span>
-                                  <span className="px-1.5 py-0.5 rounded-md bg-slate-100 text-slate-600 text-[10px] font-mono font-bold border border-slate-200">
+                              <div className="min-w-0">
+                                <div className="font-bold text-zinc-900 text-xs flex items-center gap-1.5 flex-wrap">
+                                  <span className="hover:text-emerald-700 transition-colors truncate">{lecturer.name}</span>
+                                  <span className="px-1.5 py-0.2 rounded-md bg-slate-100 text-slate-600 text-[10px] font-mono font-bold border border-slate-200 flex-shrink-0">
                                     {lecturer.id}
                                   </span>
                                 </div>
                                 <div className="text-[11px] text-zinc-400 font-mono mt-0.5 flex items-center gap-1">
                                   <span>Cấp ngày:</span>
-                                  <span className="text-zinc-500 font-medium">{lecturer.createdAt.slice(0, 10)}</span>
+                                  <span className="text-zinc-500 font-medium">
+                                    {lecturer.createdAt ? String(lecturer.createdAt).slice(0, 10) : '—'}
+                                  </span>
                                 </div>
                               </div>
                             </div>
@@ -819,38 +813,10 @@ export const LecturerManagement: React.FC<LecturerManagementProps> = ({
                           </td>
 
                           <td className="py-3.5 px-4">
-                            <div className="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl bg-blue-50/80 border border-blue-200/70 text-blue-800 text-xs font-medium max-w-[220px] shadow-2xs">
+                            <div className="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl bg-blue-50/80 border border-blue-200/70 text-blue-800 text-xs font-medium max-w-[260px] shadow-2xs">
                               <Building2 className="w-3.5 h-3.5 text-blue-600 flex-shrink-0" />
                               <span className="truncate">{lecturer.department || 'Chưa gán khoa'}</span>
                             </div>
-                          </td>
-
-                          <td className="py-3.5 px-4">
-                            <div className="font-mono text-xs text-zinc-700 font-medium">
-                              {lecturer.phone ? (
-                                <span className="px-2.5 py-1 rounded-lg bg-slate-50 border border-slate-200/80 inline-block font-mono text-xs">
-                                  {lecturer.phone}
-                                </span>
-                              ) : (
-                                <span className="text-zinc-400 italic text-[11px]">—</span>
-                              )}
-                            </div>
-                          </td>
-
-                          <td className="py-3.5 px-4 text-center">
-                            {isDefaultPass ? (
-                              <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[11px] font-semibold bg-amber-50 text-amber-800 border border-amber-200/80 shadow-2xs whitespace-nowrap">
-                                <span className="w-2 h-2 rounded-full bg-amber-500 animate-pulse flex-shrink-0" />
-                                <KeyRound className="w-3.5 h-3.5 text-amber-600 flex-shrink-0" />
-                                <span>Chờ đổi pass lần đầu</span>
-                              </span>
-                            ) : (
-                              <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[11px] font-semibold bg-emerald-50 text-emerald-800 border border-emerald-200/80 shadow-2xs whitespace-nowrap">
-                                <span className="w-2 h-2 rounded-full bg-emerald-500 flex-shrink-0" />
-                                <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 flex-shrink-0" />
-                                <span>Đã kích hoạt an toàn</span>
-                              </span>
-                            )}
                           </td>
 
                           <td className="py-3.5 px-4 text-right">
@@ -908,7 +874,6 @@ export const LecturerManagement: React.FC<LecturerManagementProps> = ({
 
                 {filteredLecturers.map((lecturer) => {
                   const isSelected = selectedIds.includes(lecturer.id);
-                  const isDefaultPass = lecturer.mustChangePassword;
 
                   return (
                     <div
@@ -924,7 +889,7 @@ export const LecturerManagement: React.FC<LecturerManagementProps> = ({
                             className="w-4 h-4 rounded border-slate-300 text-emerald-600 focus:ring-emerald-500 cursor-pointer"
                           />
                           <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-zinc-800 to-zinc-950 text-white font-black flex items-center justify-center text-sm flex-shrink-0 shadow-xs">
-                            {lecturer.name.trim().slice(0, 1).toUpperCase()}
+                            {(lecturer.name || '?').trim().slice(0, 1).toUpperCase()}
                           </div>
                           <div>
                             <div className="font-bold text-zinc-950 text-sm flex items-center gap-1.5 flex-wrap">
@@ -934,23 +899,10 @@ export const LecturerManagement: React.FC<LecturerManagementProps> = ({
                               </span>
                             </div>
                             <span className="text-[10px] text-zinc-400 font-mono">
-                              Cấp ngày: {lecturer.createdAt.slice(0, 10)}
+                              Cấp ngày: {lecturer.createdAt ? String(lecturer.createdAt).slice(0, 10) : '—'}
                             </span>
                           </div>
                         </div>
-
-                        {/* Status Badge */}
-                        {isDefaultPass ? (
-                          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-50 text-amber-800 border border-amber-200 flex-shrink-0">
-                            <KeyRound className="w-3 h-3 text-amber-600" />
-                            <span>Chờ đổi pass</span>
-                          </span>
-                        ) : (
-                          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-50 text-emerald-800 border border-emerald-200 flex-shrink-0">
-                            <CheckCircle2 className="w-3 h-3 text-emerald-600" />
-                            <span>Kích hoạt</span>
-                          </span>
-                        )}
                       </div>
 
                       {/* Info Pills */}
@@ -969,12 +921,6 @@ export const LecturerManagement: React.FC<LecturerManagementProps> = ({
                           </a>
                           <span className="text-zinc-400">•</span>
                           <span className="font-mono text-zinc-600">user: <strong>{lecturer.username}</strong></span>
-                          {lecturer.phone && (
-                            <>
-                              <span className="text-zinc-400">•</span>
-                              <span className="font-mono text-zinc-600">SĐT: {lecturer.phone}</span>
-                            </>
-                          )}
                         </div>
                       </div>
 
@@ -1236,18 +1182,6 @@ export const LecturerManagement: React.FC<LecturerManagementProps> = ({
                 )}
               </div>
 
-              {/* Phone */}
-              <div className="space-y-1">
-                <label className="text-xs font-bold text-zinc-800">Số điện thoại</label>
-                <input
-                  type="tel"
-                  value={formData.phone}
-                  onChange={e => setFormData({ ...formData, phone: e.target.value })}
-                  placeholder="0912345678"
-                  className="input-3d w-full px-3.5 py-2 text-xs font-mono text-zinc-900 border border-slate-300 rounded-xl"
-                />
-              </div>
-
               {/* Password configuration */}
               <div className="p-3.5 rounded-xl bg-slate-50 border border-slate-200 space-y-2">
                 <div className="flex items-center justify-between">
@@ -1268,20 +1202,12 @@ export const LecturerManagement: React.FC<LecturerManagementProps> = ({
                   type="text"
                   value={formData.password}
                   onChange={e => setFormData({ ...formData, password: e.target.value })}
+                  placeholder={`Mặc định: ${DEFAULT_LECTURER_PASSWORD}`}
                   className="input-3d w-full px-3.5 py-2 text-xs font-mono text-zinc-900 border border-slate-300 rounded-xl"
                 />
-
-                <label className="flex items-center gap-2 cursor-pointer pt-1">
-                  <input
-                    type="checkbox"
-                    checked={formData.mustChangePassword}
-                    onChange={e => setFormData({ ...formData, mustChangePassword: e.target.checked })}
-                    className="rounded border-slate-300 text-emerald-600 focus:ring-emerald-500"
-                  />
-                  <span className="text-xs text-zinc-700 font-medium">
-                    Bắt buộc đổi mật khẩu trong lần đăng nhập đầu tiên
-                  </span>
-                </label>
+                <p className="text-[11px] text-zinc-500">
+                  Mật khẩu khởi tạo: <strong className="font-mono text-emerald-700">{DEFAULT_LECTURER_PASSWORD}</strong> (mặc định hệ thống nếu chưa nhập).
+                </p>
               </div>
 
               {/* Buttons */}

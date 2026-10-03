@@ -285,7 +285,7 @@ export async function downloadCsvReportFromBackend(groups: Group[]) {
 }
 
 /**
- * Lấy danh sách lớp học phần từ Backend CSDL SQLite
+ * Lấy danh sách lớp học phần từ Backend CSDL PostgreSQL
  */
 export async function fetchClassesFromBackend(): Promise<ClassCohort[]> {
   const res = await fetch(`${API_BASE}/classes`);
@@ -334,7 +334,7 @@ export async function deleteClassInBackend(classId: string): Promise<boolean> {
 }
 
 /**
- * Gửi bài khảo sát của sinh viên lên Backend CSDL SQLite
+ * Gửi bài khảo sát của sinh viên lên Backend CSDL PostgreSQL
  */
 export async function submitSurveyToBackend(submission: any) {
   const res = await fetch(`${API_BASE}/surveys/submit`, {
@@ -371,7 +371,7 @@ export async function lookupStudentFromBackend(studentId: string) {
 }
 
 /**
- * Lưu phiên phân nhóm hoàn chỉnh trực tiếp vào CSDL SQLite Backend
+ * Lưu phiên phân nhóm hoàn chỉnh trực tiếp vào CSDL PostgreSQL Backend
  */
 export async function saveSessionToBackend(session: GroupingSession): Promise<GroupingSession | null> {
   try {
@@ -385,13 +385,13 @@ export async function saveSessionToBackend(session: GroupingSession): Promise<Gr
       return data.session || session;
     }
   } catch (err) {
-    console.error('Lỗi khi lưu phiên phân nhóm vào CSDL SQLite:', err);
+    console.error('Lỗi khi lưu phiên phân nhóm vào CSDL PostgreSQL:', err);
   }
   return null;
 }
 
 /**
- * Lấy danh sách tất cả các phiên phân nhóm trực tiếp từ CSDL SQLite Backend
+ * Lấy danh sách tất cả các phiên phân nhóm trực tiếp từ CSDL PostgreSQL Backend
  */
 export async function fetchSessionsFromBackend(): Promise<GroupingSession[]> {
   try {
@@ -401,13 +401,13 @@ export async function fetchSessionsFromBackend(): Promise<GroupingSession[]> {
       if (Array.isArray(data)) return data;
     }
   } catch (err) {
-    console.warn('Lỗi khi tải danh sách phiên phân nhóm từ CSDL SQLite:', err);
+    console.warn('Lỗi khi tải danh sách phiên phân nhóm từ CSDL PostgreSQL:', err);
   }
   return [];
 }
 
 /**
- * Lấy phiên phân nhóm ĐANG ĐƯỢC CÔNG BỐ trực tiếp từ CSDL SQLite Backend
+ * Lấy phiên phân nhóm ĐANG ĐƯỢC CÔNG BỐ trực tiếp từ CSDL PostgreSQL Backend
  * Có thể truyền classId để lấy kết quả công bố của lớp cụ thể.
  * Trả về null nếu giảng viên chưa công bố hoặc đã thu hồi.
  */
@@ -420,7 +420,7 @@ export async function fetchPublishedSessionFromBackend(classId?: string): Promis
       return data;
     }
   } catch (err) {
-    console.warn('Lỗi khi tải phiên phân nhóm công bố từ CSDL SQLite:', err);
+    console.warn('Lỗi khi tải phiên phân nhóm công bố từ CSDL PostgreSQL:', err);
   }
   return null;
 }
@@ -436,7 +436,7 @@ export async function fetchPublishedClassesFromBackend(): Promise<ClassCohort[]>
       return Array.isArray(data) ? data : [];
     }
   } catch (err) {
-    console.warn('Lỗi khi tải danh sách lớp đã công bố từ CSDL SQLite:', err);
+    console.warn('Lỗi khi tải danh sách lớp đã công bố từ CSDL PostgreSQL:', err);
   }
   return [];
 }
@@ -452,7 +452,7 @@ export async function fetchAllPublishedSessionsFromBackend(): Promise<GroupingSe
       return Array.isArray(data) ? data : [];
     }
   } catch (err) {
-    console.warn('Lỗi khi tải tất cả các phiên công bố từ CSDL SQLite:', err);
+    console.warn('Lỗi khi tải tất cả các phiên công bố từ CSDL PostgreSQL:', err);
   }
   return [];
 }
@@ -468,13 +468,13 @@ export async function fetchClassStudentsFromBackend(classId: string): Promise<St
       return Array.isArray(data) ? data : [];
     }
   } catch (err) {
-    console.warn(`Lỗi khi tải sinh viên của lớp ${classId} từ CSDL SQLite:`, err);
+    console.warn(`Lỗi khi tải sinh viên của lớp ${classId} từ CSDL PostgreSQL:`, err);
   }
   return [];
 }
 
 /**
- * Lưu liên kết Google Sheets của phiên phân nhóm vào CSDL SQLite
+ * Lưu liên kết Google Sheets của phiên phân nhóm vào CSDL PostgreSQL
  */
 export async function saveSessionSheetsUrlToBackend(sessionId: string, url: string): Promise<boolean> {
   try {
@@ -485,13 +485,13 @@ export async function saveSessionSheetsUrlToBackend(sessionId: string, url: stri
     });
     return res.ok;
   } catch (err) {
-    console.error('Lỗi khi lưu liên kết Google Sheets vào CSDL SQLite:', err);
+    console.error('Lỗi khi lưu liên kết Google Sheets vào CSDL PostgreSQL:', err);
     return false;
   }
 }
 
 /**
- * Cập nhật trạng thái phiên phân nhóm trực tiếp trong CSDL SQLite:
+ * Cập nhật trạng thái phiên phân nhóm trực tiếp trong CSDL PostgreSQL:
  * status = 'published': CÔNG BỐ cho sinh viên
  * status = 'draft': THU HỒI (sinh viên không xem được)
  */
@@ -507,13 +507,13 @@ export async function updateSessionStatusInBackend(
     });
     return res.ok;
   } catch (err) {
-    console.error('Lỗi khi cập nhật trạng thái phiên trong CSDL SQLite:', err);
+    console.error('Lỗi khi cập nhật trạng thái phiên trong CSDL PostgreSQL:', err);
     return false;
   }
 }
 
 /**
- * Xóa phiên phân nhóm khỏi CSDL SQLite
+ * Xóa phiên phân nhóm khỏi CSDL PostgreSQL
  */
 export async function deleteSessionFromBackend(sessionId: string): Promise<boolean> {
   try {
@@ -522,13 +522,13 @@ export async function deleteSessionFromBackend(sessionId: string): Promise<boole
     });
     return res.ok;
   } catch (err) {
-    console.error('Lỗi khi xóa phiên phân nhóm khỏi CSDL SQLite:', err);
+    console.error('Lỗi khi xóa phiên phân nhóm khỏi CSDL PostgreSQL:', err);
     return false;
   }
 }
 
 /**
- * Lưu danh sách sinh viên nạp từ tệp Excel/CSV vào CSDL SQLite
+ * Lưu danh sách sinh viên nạp từ tệp Excel/CSV vào CSDL PostgreSQL
  */
 export async function saveBulkStudentsToBackend(students: Student[], classId?: string): Promise<boolean> {
   try {
@@ -574,7 +574,7 @@ export async function clearAllStudentsFromBackend(classId?: string): Promise<boo
 }
 
 /**
- * Tải danh sách sinh viên từ CSDL SQLite / PostgreSQL (hỗ trợ lọc theo classId hoặc lecturerId)
+ * Tải danh sách sinh viên từ CSDL PostgreSQL (hỗ trợ lọc theo classId hoặc lecturerId)
  */
 export async function fetchStudentsFromBackend(classId?: string, lecturerId?: string): Promise<Student[]> {
   try {

@@ -29,7 +29,7 @@ import { SystemSettings } from './components/admin/SystemSettings';
 import { ExportHubModal, ExportTab } from './components/admin/ExportHubModal';
 import { AILecturerAgentModal } from './components/admin/AILecturerAgentModal';
 import { LecturerManagement } from './components/admin/LecturerManagement';
-import { Menu, Dna, ShieldCheck, UserCircle2, GraduationCap, LogOut, ArrowLeft, ChevronDown, Sparkles } from 'lucide-react';
+import { Menu, Dna, ShieldCheck, UserCircle2, GraduationCap, LogOut, ArrowLeft, ChevronDown, Sparkles, LayoutGrid, Bell, User, Home, Building2 } from 'lucide-react';
 import {
   fetchSessionsFromBackend,
   saveSessionToBackend,
@@ -61,19 +61,24 @@ export default function App() {
   const isSidebarExpanded = isSidebarOpen || isSidebarHovered;
   const [isAdminToolsOpen, setIsAdminToolsOpen] = useState<boolean>(false);
   const adminToolsRef = useRef<HTMLDivElement>(null);
+  const [isProfileOpen, setIsProfileOpen] = useState<boolean>(false);
+  const profileDropdownRef = useRef<HTMLDivElement>(null);
 
-  // Close admin tools dropdown on click outside
+  // Close dropdowns on click outside
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
       if (adminToolsRef.current && !adminToolsRef.current.contains(e.target as Node)) {
         setIsAdminToolsOpen(false);
+      }
+      if (profileDropdownRef.current && !profileDropdownRef.current.contains(e.target as Node)) {
+        setIsProfileOpen(false);
       }
     };
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
-  // All Active Students State (Khởi tạo rỗng, nạp 100% từ SQLite CSDL - Không dùng dữ liệu demo)
+  // All Active Students State (Khởi tạo rỗng, nạp 100% từ PostgreSQL CSDL - Không dùng dữ liệu demo)
   const [students, setStudents] = useState<Student[]>([]);
 
   // Class Cohorts State (Bắt buộc phải có lớp mới được tạo nhóm)
@@ -85,7 +90,7 @@ export default function App() {
   const [publishedSessions, setPublishedSessions] = useState<GroupingSession[]>([]);
   const [selectedPublishedClassId, setSelectedPublishedClassId] = useState<string>('');
 
-  // Grouping Sessions State (Tải và quản lý trực tiếp từ CSDL SQLite qua Backend API)
+  // Grouping Sessions State (Tải và quản lý trực tiếp từ CSDL PostgreSQL qua Backend API)
   const [sessions, setSessions] = useState<GroupingSession[]>([]);
   const [activeSessionId, setActiveSessionId] = useState<string>('');
 
@@ -190,7 +195,7 @@ export default function App() {
   // CHỈ CÔNG BỐ KHI status LÀ 'published'! THU HỒI HOẶC BẢN NHÁP THÌ TRẢ VỀ null (Sinh viên không xem được)
   const publishedSession = sessions.find(s => s.status === 'published') || null;
 
-  // Hàm làm mới dữ liệu trực tiếp từ CSDL SQLite Backend
+  // Hàm làm mới dữ liệu trực tiếp từ CSDL PostgreSQL Backend
   // Tránh người dùng phải F5 toàn bộ trang gây nghẽn và đầy server.
   const handleReloadData = async () => {
     setIsReloading(true);
@@ -241,7 +246,7 @@ export default function App() {
     }
   };
 
-  // Khởi nạp dữ liệu từ CSDL SQLite khi mở ứng dụng
+  // Khởi nạp dữ liệu từ CSDL PostgreSQL khi mở ứng dụng
   useEffect(() => {
     handleReloadData();
   }, []);
@@ -301,7 +306,7 @@ export default function App() {
     if (targetClass) {
       setActiveClass(targetClass);
     }
-    // LƯU BỀN VỮNG TOÀN BỘ SINH VIÊN VÀO CSDL SQLITE
+    // LƯU BỀN VỮNG TOÀN BỘ SINH VIÊN VÀO CSDL POSTGRESQL
     saveBulkStudentsToBackend(taggedStudents, classId);
   };
 
@@ -326,7 +331,7 @@ export default function App() {
     setIsGARunnerOpen(false);
     setCurrentView('admin-results');
 
-    // LƯU BỀN VỮNG PHIÊN PHÂN NHÓM VÀO CSDL SQLITE (Không mất khi F5)
+    // LƯU BỀN VỮNG PHIÊN PHÂN NHÓM VÀO CSDL POSTGRESQL (Không mất khi F5)
     const saved = await saveSessionToBackend(sessionWithClass);
     if (saved) {
       setSessions(prev => prev.map(s => s.id === sessionWithClass.id ? saved : s));
@@ -342,7 +347,7 @@ export default function App() {
       return s;
     }));
 
-    // ĐỒNG BỘ CÔNG BỐ / THU HỒI LÊN CSDL SQLITE
+    // ĐỒNG BỘ CÔNG BỐ / THU HỒI LÊN CSDL POSTGRESQL
     await updateSessionStatusInBackend(updatedSession.id, updatedSession.status as any);
     await saveSessionToBackend(updatedSession);
 
@@ -592,44 +597,53 @@ export default function App() {
 
           {/* Main Content Viewport with dynamic flex alignment */}
           <div className="flex-1 min-w-0 max-w-full flex flex-col min-h-screen transition-all duration-300 overflow-x-clip">
-            {/* Admin Top Nav Bar - Cố định chắc chắn ở đầu trang */}
-            <header className="sticky top-0 z-40 bg-white/95 backdrop-blur-md border-b border-slate-200/90 px-4 py-3.5 flex items-center justify-between no-print shadow-xs transition-all">
+            {/* Admin Top Nav Bar - Chuẩn giao diện Hệ thống LMS (Tham chiếu Hình 2) */}
+            <header className="sticky top-0 z-40 bg-white/95 backdrop-blur-md border-b border-slate-200/90 px-3.5 sm:px-6 py-2.5 flex items-center justify-between no-print shadow-xs transition-all">
               <div className="flex items-center gap-3">
                 <button
                   onClick={() => setIsSidebarOpen(!isSidebarOpen)}
-                  className="p-2 text-zinc-600 hover:text-indigo-600 hover:bg-indigo-50 rounded-full transition-colors cursor-pointer border border-slate-200"
+                  className="p-2 text-zinc-600 hover:text-indigo-600 hover:bg-indigo-50 rounded-xl transition-colors cursor-pointer border border-slate-200"
                   title="Chuyển đổi thanh điều hướng bên trái"
                 >
                   <Menu className="w-5 h-5" />
                 </button>
 
-                <div className="flex items-center gap-2">
-                  <span className="font-display font-black text-zinc-950 text-sm hidden sm:inline tracking-tight">
-                    {userRole === 'admin' ? 'NOVIARA QUẢN TRỊ CẤP CAO' : 'CỔNG GIẢNG VIÊN NOVIARA'}
-                  </span>
+                <div className="flex items-center gap-2.5">
+                  <img src="/logo.png" alt="NOVIARA" className="w-7 h-7 object-contain hidden xs:block" />
+                  <div>
+                    <div className="flex items-center gap-2">
+                      <span className="font-display font-black text-zinc-950 text-xs sm:text-sm tracking-tight">
+                        {userRole === 'admin' ? 'NOVIARA ĐÀO TẠO & QUẢN TRỊ' : 'CỔNG GIẢNG VIÊN • NOVIARA'}
+                      </span>
+                      <span className="hidden md:inline-flex px-1.5 py-0.2 rounded-md bg-indigo-50 text-indigo-700 text-[9px] font-mono font-bold border border-indigo-200">
+                        {userRole === 'admin' ? 'Cấp Cao' : 'Đào Tạo'}
+                      </span>
+                    </div>
+                    <p className="text-[10px] text-zinc-400 font-medium hidden sm:block">
+                      Hệ thống tự động hóa phân nhóm GA &amp; Quản trị đào tạo
+                    </p>
+                  </div>
                 </div>
               </div>
 
-              {/* Quick Header Indicators & Actions */}
-              <div className="flex items-center gap-2 sm:gap-3">
+              {/* Quick Header Indicators & Actions (Chuẩn LMS Hình 2) */}
+              <div className="flex items-center gap-1.5 sm:gap-3">
 
-                {/* Dropdown: Tiện ích & Lối tắt */}
+                {/* App Launcher: Tiện ích & Lối tắt */}
                 <div ref={adminToolsRef} className="relative">
                   <button
                     onClick={() => setIsAdminToolsOpen(v => !v)}
-                    className="rounded-full bg-slate-100 hover:bg-indigo-50 hover:text-indigo-700 hover:border-indigo-300 flex items-center gap-1.5 px-3.5 py-1.5 text-xs font-bold text-zinc-800 transition-colors cursor-pointer border border-slate-200 shadow-xs btn-hover-lift"
+                    className="p-2 text-zinc-600 hover:text-indigo-700 hover:bg-indigo-50 rounded-xl transition-colors cursor-pointer border border-slate-200/80 shadow-2xs"
                     title="Tiện ích & Lối tắt hệ thống"
                   >
-                    <Sparkles className="w-3.5 h-3.5 text-indigo-600" />
-                    <span className="hidden sm:inline">Tiện ích & Lối tắt</span>
-                    <span className="sm:hidden">Tiện ích</span>
-                    <ChevronDown className={`w-3.5 h-3.5 text-zinc-500 transition-transform duration-200 ${isAdminToolsOpen ? 'rotate-180' : ''}`} />
+                    <LayoutGrid className="w-4 h-4" />
                   </button>
 
                   {isAdminToolsOpen && (
                     <div className="absolute right-0 top-full mt-2 w-56 bg-white rounded-2xl border border-slate-200 shadow-2xl z-50 overflow-hidden animate-in fade-in zoom-in-95 max-w-[calc(100vw-2rem)]">
-                      <div className="px-3 py-2 border-b border-slate-100">
+                      <div className="px-3 py-2 border-b border-slate-100 flex items-center justify-between">
                         <span className="text-[10px] font-bold uppercase tracking-wider text-zinc-400">Tiện ích & Lối tắt</span>
+                        <Sparkles className="w-3.5 h-3.5 text-indigo-600" />
                       </div>
                       <div className="p-1.5 space-y-0.5">
                         {userRole === 'admin' && (
@@ -666,16 +680,105 @@ export default function App() {
                   )}
                 </div>
 
-                {/* Logout - Duy nhất trên thanh Header cố định */}
-                <button
-                  id="header-admin-logout-btn"
-                  onClick={handleAdminLogout}
-                  className="rounded-full bg-red-50 hover:bg-red-100 text-red-700 flex items-center gap-1.5 px-3 sm:px-3.5 py-1.5 text-xs font-bold cursor-pointer transition-colors border border-red-200 shadow-xs btn-hover-lift"
-                  title="Đăng xuất khỏi hệ thống quản trị"
-                >
-                  <LogOut className="w-3.5 h-3.5 flex-shrink-0" />
-                  <span className="hidden xs:inline">Đăng xuất</span>
-                </button>
+                {/* LMS Notification Bell (Chuẩn Hệ Thống LMS Hình 2) */}
+                <div className="relative">
+                  <button
+                    className="p-2 text-zinc-600 hover:text-indigo-700 hover:bg-indigo-50 rounded-xl transition-colors cursor-pointer border border-slate-200/80 shadow-2xs relative"
+                    title="Thông báo hệ thống"
+                  >
+                    <Bell className="w-4 h-4" />
+                    <span className="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-indigo-600 ring-2 ring-white" />
+                  </button>
+                </div>
+
+                {/* LMS User Profile Pill (Tham chiếu trực tiếp Hình 2) */}
+                <div ref={profileDropdownRef} className="relative">
+                  <button
+                    onClick={() => setIsProfileOpen(v => !v)}
+                    className="flex items-center gap-2 p-1 sm:pr-2.5 sm:pl-1.5 rounded-full hover:bg-slate-100/90 transition-all border border-slate-200/90 bg-white shadow-2xs cursor-pointer btn-hover-lift"
+                    title="Thông tin tài khoản"
+                  >
+                    <div className={`w-8 h-8 rounded-full font-bold text-xs flex items-center justify-center shadow-xs flex-shrink-0 ${
+                      userRole === 'admin' 
+                        ? 'bg-emerald-600 text-white' 
+                        : 'bg-indigo-600 text-white'
+                    }`}>
+                      {userRole === 'admin' ? (
+                        <ShieldCheck className="w-4 h-4" />
+                      ) : (
+                        (currentLecturer?.name || 'GV').trim().slice(0, 1).toUpperCase()
+                      )}
+                    </div>
+                    <div className="text-left hidden sm:block max-w-[140px]">
+                      <div className="text-xs font-bold text-zinc-900 leading-tight truncate">
+                        {userRole === 'admin' ? 'Quản Trị Viên' : (currentLecturer?.name || 'Giảng Viên')}
+                      </div>
+                      <div className="text-[10px] text-zinc-400 font-medium leading-none truncate mt-0.5">
+                        {userRole === 'admin' ? 'Quản trị cấp cao' : (currentLecturer?.department || 'Khoa đào tạo')}
+                      </div>
+                    </div>
+                    <ChevronDown className={`w-3.5 h-3.5 text-zinc-400 hidden sm:block transition-transform duration-200 ${isProfileOpen ? 'rotate-180' : ''}`} />
+                  </button>
+
+                  {/* Profile Dropdown Menu */}
+                  {isProfileOpen && (
+                    <div className="absolute right-0 top-full mt-2 w-64 bg-white rounded-2xl border border-slate-200 shadow-2xl z-50 p-2 overflow-hidden animate-in fade-in zoom-in-95 max-w-[calc(100vw-1.5rem)]">
+                      <div className="p-3 bg-slate-50/80 rounded-xl border border-slate-100 mb-1.5">
+                        <div className="flex items-center gap-2.5">
+                          <div className={`w-9 h-9 rounded-full font-bold text-xs flex items-center justify-center text-white shadow-xs shrink-0 ${
+                            userRole === 'admin' ? 'bg-emerald-600' : 'bg-indigo-600'
+                          }`}>
+                            {userRole === 'admin' ? (
+                              <ShieldCheck className="w-4 h-4" />
+                            ) : (
+                              (currentLecturer?.name || 'GV').trim().slice(0, 1).toUpperCase()
+                            )}
+                          </div>
+                          <div className="min-w-0 flex-1">
+                            <p className="text-xs font-bold text-zinc-950 truncate">
+                              {userRole === 'admin' ? 'Quản trị viên Cấp cao' : currentLecturer?.name}
+                            </p>
+                            <p className="text-[10px] text-zinc-500 font-mono truncate">
+                              {userRole === 'admin' ? 'admin@noviara.edu.vn' : (currentLecturer?.email || 'gv@noviara.edu.vn')}
+                            </p>
+                            {currentLecturer?.department && (
+                              <span className="inline-block mt-1 px-1.5 py-0.2 rounded bg-blue-50 text-blue-700 text-[9px] font-medium border border-blue-200/60 truncate max-w-full">
+                                {currentLecturer.department}
+                              </span>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+
+                      <div className="space-y-0.5 text-xs">
+                        <button
+                          onClick={() => {
+                            setUserRole('user');
+                            setCurrentView('user-home');
+                            setIsProfileOpen(false);
+                          }}
+                          className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-zinc-700 hover:bg-indigo-50 hover:text-indigo-700 font-medium transition-colors cursor-pointer text-left"
+                        >
+                          <Home className="w-4 h-4 text-indigo-600" />
+                          <span>Xem Cổng Sinh Viên</span>
+                        </button>
+
+                        <div className="border-t border-slate-100 my-1" />
+
+                        <button
+                          onClick={() => {
+                            setIsProfileOpen(false);
+                            handleAdminLogout();
+                          }}
+                          className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-rose-600 hover:bg-rose-50 font-bold transition-colors cursor-pointer text-left"
+                        >
+                          <LogOut className="w-4 h-4 text-rose-500" />
+                          <span>Đăng Xuất Khỏi Hệ Thống</span>
+                        </button>
+                      </div>
+                    </div>
+                  )}
+                </div>
               </div>
             </header>
 

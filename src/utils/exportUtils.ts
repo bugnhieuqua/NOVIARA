@@ -17,7 +17,7 @@ export function exportGroupsToExcel(groups: Group[], title: string = 'Danh_Sach_
     'MSSV',
     'Họ và Tên',
     'Email',
-    'Số Điện Thoại',
+    
     'Giới Tính',
     'GPA',
     'Vai Trò',

@@ -303,7 +303,7 @@ export const GroupDetailModal: React.FC<GroupDetailModalProps> = ({
                     <div className="flex items-start justify-between gap-2">
                       <div className="flex items-center gap-2.5 min-w-0">
                         <div className="w-8 h-8 rounded-full bg-zinc-100 text-zinc-700 font-bold flex items-center justify-center font-display text-xs border border-zinc-200 shrink-0">
-                          {member.name.slice(0, 1)}
+                          {(member.name || '?').slice(0, 1)}
                         </div>
                         <div className="min-w-0">
                           <div className="font-bold text-xs text-zinc-900 flex items-center gap-1.5 flex-wrap">
